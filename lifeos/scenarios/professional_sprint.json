@@ -1,0 +1,33 @@
+{
+  "name": "professional_sprint",
+  "display_name": "Working Professional - Deadline Sprint",
+  "profile": {
+    "name": "Aanya",
+    "role": "Product Manager",
+    "age": 29,
+    "stress": 0.7,
+    "energy": 0.5,
+    "money": 3400.0,
+    "relationship": 0.62,
+    "sleep_hours": 5.5
+  },
+  "tasks": [
+    {"id": "p1", "title": "Ship sprint plan", "deadline_hours": 6, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "p2", "title": "Resolve team conflict", "deadline_hours": 9, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "p3", "title": "Client call prep", "deadline_hours": 5, "priority": 4, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "p4", "title": "Doctor appointment", "deadline_hours": 14, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "p5", "title": "Expense review", "deadline_hours": 22, "priority": 3, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "p6", "title": "Gym session", "deadline_hours": 18, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "p7", "title": "1:1 with manager", "deadline_hours": 11, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "p8", "title": "Parent call", "deadline_hours": 16, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "p9", "title": "Inbox cleanup", "deadline_hours": 28, "priority": 2, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "p10", "title": "Sleep block", "deadline_hours": 10, "priority": 5, "remaining_effort": 2.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 3, "event_type": "scope_creep", "description": "Urgent feature request from client.", "impact": {"stress": 0.07}},
+    {"timestep": 8, "event_type": "team_argument", "description": "Two engineers escalate conflict.", "impact": {"stress": 0.09, "relationship": -0.06}},
+    {"timestep": 13, "event_type": "health_dip", "description": "Mild migraine episode.", "impact": {"energy": -0.1, "stress": 0.04}},
+    {"timestep": 19, "event_type": "bonus_news", "description": "Performance bonus announced.", "impact": {"money": 220.0, "stress": -0.05}},
+    {"timestep": 24, "event_type": "partner_support", "description": "Supportive message from partner.", "impact": {"relationship": 0.08, "stress": -0.04}}
+  ]
+}

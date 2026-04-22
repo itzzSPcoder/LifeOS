@@ -1,0 +1,33 @@
+{
+  "name": "campus_fest_chaos",
+  "display_name": "Campus Fest + Academics Collision",
+  "profile": {
+    "name": "Isha",
+    "role": "Student Organizer",
+    "age": 21,
+    "stress": 0.77,
+    "energy": 0.47,
+    "money": 900.0,
+    "relationship": 0.65,
+    "sleep_hours": 5.0
+  },
+  "tasks": [
+    {"id": "cf1", "title": "Stage setup", "deadline_hours": 6, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "cf2", "title": "Sponsor coordination", "deadline_hours": 8, "priority": 4, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "cf3", "title": "Lab assignment", "deadline_hours": 9, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "cf4", "title": "Volunteer roster", "deadline_hours": 5, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "cf5", "title": "Poster approvals", "deadline_hours": 7, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "cf6", "title": "Exam revision", "deadline_hours": 11, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "cf7", "title": "Mess bill", "deadline_hours": 12, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "cf8", "title": "Sleep block", "deadline_hours": 10, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "cf9", "title": "Parent call", "deadline_hours": 13, "priority": 2, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "cf10", "title": "Hydration", "deadline_hours": 6, "priority": 3, "remaining_effort": 1.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 2, "event_type": "speaker_cancel", "description": "Main speaker cancels unexpectedly.", "impact": {"stress": 0.08}},
+    {"timestep": 5, "event_type": "friend_support", "description": "Friends step in to help event.", "impact": {"relationship": 0.07, "stress": -0.04}},
+    {"timestep": 8, "event_type": "budget_cut", "description": "Sponsorship reduced.", "impact": {"money": -140.0, "stress": 0.05}},
+    {"timestep": 12, "event_type": "faculty_extension", "description": "Assignment deadline extended.", "impact": {"stress": -0.06}},
+    {"timestep": 17, "event_type": "weather_warning", "description": "Rain warning for outdoor event.", "impact": {"stress": 0.05, "energy": -0.03}}
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "health_recovery",
+  "display_name": "Health Recovery - Work While Sick",
+  "profile": {
+    "name": "Karan",
+    "role": "Analyst",
+    "age": 26,
+    "stress": 0.68,
+    "energy": 0.35,
+    "money": 1800.0,
+    "relationship": 0.64,
+    "sleep_hours": 4.7
+  },
+  "tasks": [
+    {"id": "h1", "title": "Complete weekly report", "deadline_hours": 8, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "h2", "title": "Visit doctor", "deadline_hours": 6, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h3", "title": "Take medicines", "deadline_hours": 4, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h4", "title": "Inform manager", "deadline_hours": 5, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h5", "title": "Hydrate well", "deadline_hours": 10, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h6", "title": "Sleep cycle reset", "deadline_hours": 12, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "h7", "title": "Light exercise", "deadline_hours": 18, "priority": 2, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h8", "title": "Call parents", "deadline_hours": 9, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h9", "title": "Meal prep", "deadline_hours": 15, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "h10", "title": "Triage inbox", "deadline_hours": 20, "priority": 2, "remaining_effort": 1.5, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 3, "event_type": "fever_spike", "description": "Body temperature rises.", "impact": {"energy": -0.12, "stress": 0.06}},
+    {"timestep": 7, "event_type": "medicine_effect", "description": "Medicine improves condition.", "impact": {"energy": 0.1, "stress": -0.05}},
+    {"timestep": 11, "event_type": "urgent_ping", "description": "Boss asks for quick update.", "impact": {"stress": 0.05}},
+    {"timestep": 16, "event_type": "friend_help", "description": "Friend drops food at home.", "impact": {"relationship": 0.06, "stress": -0.04}},
+    {"timestep": 22, "event_type": "sleep_gain", "description": "Finally got proper sleep.", "impact": {"energy": 0.08, "stress": -0.06}}
+  ]
+}

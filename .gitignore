@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local artifacts
+lifeos/data/*.db
+lifeos/outputs/*
+!lifeos/outputs/.gitkeep
+models/*
+!models/.gitkeep

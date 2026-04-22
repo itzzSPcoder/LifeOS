@@ -1,0 +1,16 @@
+.git
+.gitignore
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db-journal
+lifeos/data/*.db
+lifeos/outputs/*
+!lifeos/outputs/.gitkeep
+models/*
+!models/.gitkeep
+_docx_extract
+LifeOS_Final_Blueprint.docx

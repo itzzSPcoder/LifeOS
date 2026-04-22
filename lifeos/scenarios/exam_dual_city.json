@@ -1,0 +1,33 @@
+{
+  "name": "exam_dual_city",
+  "display_name": "Exam + Intercity Travel",
+  "profile": {
+    "name": "Samar",
+    "role": "MBA Aspirant",
+    "age": 24,
+    "stress": 0.81,
+    "energy": 0.44,
+    "money": 1500.0,
+    "relationship": 0.57,
+    "sleep_hours": 5.1
+  },
+  "tasks": [
+    {"id": "e1", "title": "Travel booking", "deadline_hours": 4, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "e2", "title": "Revision set 1", "deadline_hours": 7, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "e3", "title": "Revision set 2", "deadline_hours": 11, "priority": 4, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "e4", "title": "Pack documents", "deadline_hours": 5, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "e5", "title": "Call hostel", "deadline_hours": 6, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "e6", "title": "Food planning", "deadline_hours": 10, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "e7", "title": "Recharge SIM", "deadline_hours": 8, "priority": 2, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "e8", "title": "Sleep block", "deadline_hours": 9, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "e9", "title": "Mock quiz", "deadline_hours": 12, "priority": 4, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "e10", "title": "Relaxation", "deadline_hours": 14, "priority": 2, "remaining_effort": 1.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 3, "event_type": "train_cancelled", "description": "Original train gets cancelled.", "impact": {"stress": 0.08, "money": -120.0}},
+    {"timestep": 6, "event_type": "friend_notes", "description": "Friend shares useful notes.", "impact": {"stress": -0.05, "relationship": 0.05}},
+    {"timestep": 9, "event_type": "weather_alert", "description": "Heavy rain warning.", "impact": {"stress": 0.04, "energy": -0.03}},
+    {"timestep": 13, "event_type": "seat_upgrade", "description": "Better travel seat found.", "impact": {"stress": -0.03, "energy": 0.04}},
+    {"timestep": 18, "event_type": "exam_center_change", "description": "Exam center shifted.", "impact": {"stress": 0.06}}
+  ]
+}

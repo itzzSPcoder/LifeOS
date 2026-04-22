@@ -1,0 +1,156 @@
+LifeOS
+Train AI to Manage Real Human Life Chaos
+Final Consolidated Product Blueprint
+OpenEnv Hackathon  |  April 2026
+Build Philosophy: Environment → Training → CLI Interface → Polish
+  01 — Product Requirements Document  
+1. Executive Summary
+LifeOS is a reinforcement learning environment built on OpenEnv that trains AI agents to handle dynamic, messy, real-world human life situations. Unlike existing AI assistants that answer questions in isolation, LifeOS trains agents to make multi-step decisions under conflicting priorities, emotional pressure, incomplete information, and constant disruptions — the realities of actual human life.
+The agent is trained using PPO via HuggingFace TRL with an LLM backbone (Mistral-7B-Instruct / Llama-3-8B-Instruct), producing decisions with natural language reasoning — not just numeric action indices. The interface is a CLI terminal — clean, fast, and distraction-free.
+2. Problem Statement
+THE CORE GAP
+Current AI systems are trained on clean, well-defined tasks. Real human life is none of that. A student with an exam tomorrow, an angry friend, a broken laptop, and a worried mother calling — this is not a solvable chatbot query. It requires judgment under pressure.
+WHY THIS MATTERS
+AI agents fail at multi-constraint real-world scenarios
+No RL environment currently simulates personal life chaos
+Delayed, sparse rewards make this a hard and valuable training problem
+Solving this unlocks a new category of genuinely useful personal AI
+LLM-based PPO with TRL produces interpretable, language-level reasoning per action
+3. What We Are Building
+CORE PRODUCT
+An OpenEnv-compatible Gymnasium environment that simulates a human's life over 7 simulated days. The environment includes a state space, action space, reward model, and scenario generator. An AI agent is trained using PPO/TRL (with Mistral or Llama as the LLM backbone) to navigate this environment and maximize life balance scores.
+All interaction happens through a rich CLI terminal interface — outputs are formatted, color-coded, and structured. No web UI is shipped in this version. A React/Next.js dashboard is defined in future scope.
+HACKATHON DELIVERABLES
+Custom Gymnasium-compatible LifeOS environment (OpenEnv-based)
+10+ hand-crafted life scenarios (student, professional, budget crisis, etc.)
+PPO training script using HuggingFace TRL + Unsloth with LLM backbone
+CLI terminal interface showing agent decisions, rewards, and state in real-time
+HuggingFace blog post documenting the environment (judging requirement)
+4. Features — In Scope
+4.1 ENVIRONMENT CORE
+State space tracking: time, tasks, energy, stress, finances, relationships, weather, deadlines
+Action space: schedule, postpone, cancel, message, rest, commute, buy, delegate, prioritize (11 actions)
+Partial observability: agent does not know future events
+Dynamic event injection: surprise events mid-episode
+Episode length: 7 simulated days (168 simulated hours)
+4.2 REWARD MODEL
+Positive: task completion, stress reduction, sleep maintained, relationships preserved
+Negative: missed deadlines, burnout, social damage, impossible scheduling
+Long-horizon: end-of-week composite score across productivity, wellbeing, trust, balance
+Formula: Reward = 0.4*task_completion + 0.2*stress_reduction + 0.2*sleep_maintained + 0.1*money_saved + 0.1*relationship_score
+4.3 SCENARIO GENERATOR
+Student week scenario — exam + interview + angry friend + rent due
+Working professional scenario — deadline + team conflict + health issue
+Budget crisis scenario — income drop + essential expenses + social obligations
+Family emergency scenario — travel disruption + work deadlines + emotional load
+4.4 TRAINING PIPELINE
+PPO training via HuggingFace TRL with Mistral-7B-Instruct or Llama-3-8B-Instruct
+Unsloth for GPU-efficient fine-tuning on Google Colab
+Reward curve visualization via Matplotlib / W&B
+Before/after behavior comparison between heuristic agent and trained LLM agent
+4.5 CLI INTERFACE
+Rich terminal output using Python `rich` library
+Live state display: stress bar, energy bar, task completion %, money, relationships
+Action feed: timestep | action | LLM reasoning | reward per step
+Event notifications printed as alert blocks mid-episode
+End-of-episode score cards: productivity, wellbeing, trust, balance
+Heuristic vs PPO comparison table rendered in terminal
+5. Out of Scope (v1)
+6. Success Criteria
+7. Hackathon Theme Alignment
+  02 — App Flow & User Journey  
+1. System Overview
+LifeOS v1 ships with a CLI terminal interface. There are two distinct user journeys: (1) the Developer/Researcher who configures, trains, and runs the agent from the command line, and (2) the Judge/Demo Viewer who watches the trained agent operate through a structured terminal session. A React dashboard is future scope and is fully specified below for the next build phase.
+2. Journey 1 — Developer / CLI Flow
+STEP 1: ENVIRONMENT SETUP
+Clone repo, activate Python 3.11 venv, install all deps
+Run: python -m lifeos.cli --setup → validates env + DB schema
+Terminal confirms: [OK] Environment initialized. Scenarios loaded: 10
+STEP 2: SCENARIO SELECTION
+Run: python -m lifeos.cli --list-scenarios → prints scenario table
+Select: python -m lifeos.cli --scenario student_week → loads profile
+Terminal shows: User Profile Card | Task List | Event Queue | State Init
+STEP 3: RUN HEURISTIC AGENT
+Run: python -m lifeos.cli --agent heuristic --scenario student_week
+Terminal streams action feed: [T+002h] ACTION: schedule_study | Reason: exam in 10h | Reward: +0.4
+State bars update each step: Stress [████████░░] 8.0 | Energy [███░░░░░░░] 3.0
+Random events print as alert blocks: ⚡ EVENT: Laptop battery dead. Energy -0.5, Money -1200
+Episode end: prints score card table (productivity, wellbeing, trust, balance)
+STEP 4: RUN PPO-TRAINED AGENT
+Run: python -m lifeos.cli --agent ppo --model ./models/lifeos_ppo_v1 --scenario student_week
+Same stream format — but reasoning comes from LLM output
+End of episode: Comparison table — Heuristic vs PPO side by side
+STEP 5: TRAINING
+Run: python -m lifeos.training.train --scenario student_week --episodes 100
+Progress bar streams: Episode 47/100 | Avg Reward: 0.61 | Best: 0.79
+Saves reward curve as rewards.json + PNG plot on completion
+3. Journey 2 — Judge/Demo Viewer Flow
+PRESENTER RUNS PRE-CONFIGURED DEMO SCRIPT
+python -m lifeos.cli --demo → loads Rahul scenario, pauses for effect
+[SCREEN 1] Rahul's situation prints: exam tomorrow, interview today, girlfriend upset, rent due
+Stress: 9/10 displayed in red. Task completion: 40%.
+[SCREEN 2] Presenter types: run → heuristic agent fires, chaotic decisions visible
+[SCREEN 3] Presenter types: run-ppo → trained agent fires, better decisions visible
+[SCREEN 4] Comparison table prints. Stress: 9→5. Completion: 40%→82%. Reward curve PNG shown.
+Judge gets the full story in under 60 seconds from a terminal.
+4. CLI Screen Map
+5. Future Scope — React Dashboard (Not Shipped in v1)
+The following screen map is fully specified for the next build phase. It matches the React/Next.js frontend described in the original AppFlow document. Building this requires the CLI backend to already be working — which is why CLI comes first.
+6. Navigation Flow
+CLI Flow: Setup → List Scenarios → Load Scenario → Run Heuristic → Run PPO → Compare → Train → Demo
+Future Web Flow: Landing → Config Panel → Live Run → Results → [Optional] Training View
+Reset available at any point via Ctrl+C → re-run with same scenario.
+  03 — Tech Stack  
+1. Architecture Overview
+LifeOS is a 3-layer system: (1) RL Environment layer built in Python using Gymnasium + OpenEnv, (2) Training layer using HuggingFace TRL + Unsloth with an LLM backbone, and (3) CLI Interface layer using Python's `rich` library. Training runs as a separate script on Google Colab (free GPU). The FastAPI backend and SQLite DB persist state across runs. A React/Next.js frontend is future scope.
+2. RL Environment
+3. Training Pipeline
+4. Backend / API
+5. CLI Interface
+6. Dev Tools
+7. Folder Structure
+8. Why This Stack (Not Simplified)
+The Blueprint document proposed Stable-Baselines3 + Streamlit as a simpler alternative. That approach is explicitly rejected here. Here is why:
+  04 — Backend Schema  
+1. Database: SQLite via SQLAlchemy
+LifeOS uses SQLite for local development and hackathon demo. All tables are defined via SQLAlchemy ORM models. The database stores scenarios, episodes, states, actions, rewards, and events. The FastAPI backend reads/writes this DB on every step.
+2. Tables
+2.1 scenarios
+Stores 10+ pre-built life scenarios. Each scenario is the starting point for an episode.
+2.2 episodes
+Each agent run through an environment = one episode. Stores metadata and final scores.
+2.3 states
+Snapshot of the world state at each timestep within an episode (one per simulated hour).
+2.4 actions
+Every action the LLM or heuristic agent takes, linked to a state snapshot.
+2.5 events
+Dynamic events that occur mid-episode — both scripted (from scenario JSON) and random (probabilistic injection).
+2.6 training_runs
+Metadata for each TRL/PPO training run. Stores the full reward-per-episode array for plotting.
+3. Table Relationships
+scenarios (1) → episodes (many): one scenario can be run many times by different agents
+episodes (1) → states (many): one state snapshot per timestep (up to 168)
+episodes (1) → actions (many): one action per timestep
+episodes (1) → events (many): multiple events per episode
+states (1) → actions (1): each action references the exact state it was taken from
+scenarios (1) → training_runs (many): scenario can be trained on multiple times
+4. Key API Endpoints
+5. Scenario JSON Format
+Each scenario file (lifeos/scenarios/student_week.json) follows this exact schema:
+{ "scenario_id": 1, "name": "student_week", "display_name": "Student Week",
+  "state": { "stress": 8, "energy": 4, "sleep": 5, "money": 1000,
+    "exam_hours_left": 10, "interview_hours_left": 4,
+    "friend_relationship": 0.6, "task_count": 5 },
+  "tasks": [...], "events": [...] }
+  05 — 5-Day Implementation Plan  
+1. Build Philosophy
+Build in layers. The environment is the product — everything else serves it. A working RL environment with a visible reward curve beats a beautiful UI with a broken backend every single time. CLI interface ships with the environment. Training comes on Day 3-4. Polish and demo prep on Day 5.
+Priority order: Environment → API → Training → CLI Interface → Demo Polish
+2. Day 1 — Project Setup + RL Environment Core
+3. Day 2 — Heuristic Agent + CLI Interface
+4. Day 3 — TRL + Unsloth Training Pipeline
+5. Day 4 — PPO CLI Integration + Comparison
+6. Day 5 — Demo Polish + Blog Post + Pitch Prep
+7. Risk Mitigation
+8. Judging Criteria Mapping
+9. Daily Commit Checklist

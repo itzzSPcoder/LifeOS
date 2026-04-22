@@ -1,0 +1,33 @@
+{
+  "name": "budget_crisis",
+  "display_name": "Budget Crisis - Income Drop Week",
+  "profile": {
+    "name": "Imran",
+    "role": "Freelancer",
+    "age": 31,
+    "stress": 0.76,
+    "energy": 0.48,
+    "money": 550.0,
+    "relationship": 0.58,
+    "sleep_hours": 5.0
+  },
+  "tasks": [
+    {"id": "b1", "title": "Deliver client project", "deadline_hours": 7, "priority": 5, "remaining_effort": 2.5, "status": "todo"},
+    {"id": "b2", "title": "Negotiate rent extension", "deadline_hours": 10, "priority": 5, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "b3", "title": "Pay electricity bill", "deadline_hours": 12, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "b4", "title": "Buy essentials", "deadline_hours": 6, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "b5", "title": "Apply to 3 gigs", "deadline_hours": 20, "priority": 4, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "b6", "title": "Call family", "deadline_hours": 14, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "b7", "title": "Portfolio update", "deadline_hours": 26, "priority": 3, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "b8", "title": "Sleep recovery", "deadline_hours": 9, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "b9", "title": "Meal prep", "deadline_hours": 16, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "b10", "title": "Tax receipt filing", "deadline_hours": 30, "priority": 2, "remaining_effort": 1.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 2, "event_type": "payment_delay", "description": "Client delays payment by a week.", "impact": {"money": -180.0, "stress": 0.09}},
+    {"timestep": 6, "event_type": "medical_expense", "description": "Unexpected medicine expense.", "impact": {"money": -120.0, "stress": 0.04}},
+    {"timestep": 11, "event_type": "friend_wedding", "description": "Social obligation invitation.", "impact": {"stress": 0.05, "relationship": 0.02}},
+    {"timestep": 17, "event_type": "small_client", "description": "Quick paid micro-task appears.", "impact": {"money": 130.0, "stress": -0.03}},
+    {"timestep": 23, "event_type": "parent_pressure", "description": "Family asks for financial update.", "impact": {"stress": 0.06, "relationship": -0.03}}
+  ]
+}

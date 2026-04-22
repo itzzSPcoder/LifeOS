@@ -1,0 +1,33 @@
+{
+  "name": "rahul_story",
+  "display_name": "Rahul Demo Arc - Exam + Interview + Rent",
+  "profile": {
+    "name": "Rahul",
+    "role": "Engineering Student",
+    "age": 22,
+    "stress": 0.9,
+    "energy": 0.4,
+    "money": 1000.0,
+    "relationship": 0.5,
+    "sleep_hours": 4.5
+  },
+  "tasks": [
+    {"id": "r1", "title": "Final exam prep", "deadline_hours": 10, "priority": 5, "remaining_effort": 3.0, "status": "todo"},
+    {"id": "r2", "title": "Interview attendance", "deadline_hours": 4, "priority": 5, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "r3", "title": "Pay rent", "deadline_hours": 12, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r4", "title": "Reply girlfriend", "deadline_hours": 3, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r5", "title": "Fix laptop battery", "deadline_hours": 6, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r6", "title": "Call mom", "deadline_hours": 8, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r7", "title": "Lunch", "deadline_hours": 5, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r8", "title": "Hydration break", "deadline_hours": 7, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "r9", "title": "Backup notes", "deadline_hours": 9, "priority": 3, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "r10", "title": "Sleep recovery", "deadline_hours": 11, "priority": 5, "remaining_effort": 2.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 2, "event_type": "angry_friend", "description": "Friend says you ignored him.", "impact": {"stress": 0.08, "relationship": -0.09}},
+    {"timestep": 4, "event_type": "battery_dead", "description": "Laptop battery died.", "impact": {"money": -180.0, "stress": 0.06, "energy": -0.04}},
+    {"timestep": 6, "event_type": "mother_call", "description": "Mom worried, asks if you're okay.", "impact": {"relationship": 0.05, "stress": 0.03}},
+    {"timestep": 9, "event_type": "professor_mail", "description": "Exam venue changed unexpectedly.", "impact": {"stress": 0.07}},
+    {"timestep": 14, "event_type": "mentor_support", "description": "Mentor motivates you before exam.", "impact": {"stress": -0.1, "relationship": 0.08}}
+  ]
+}

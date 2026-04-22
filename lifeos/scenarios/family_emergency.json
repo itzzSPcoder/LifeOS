@@ -1,0 +1,33 @@
+{
+  "name": "family_emergency",
+  "display_name": "Family Emergency - Travel + Deadlines",
+  "profile": {
+    "name": "Neha",
+    "role": "Software Engineer",
+    "age": 27,
+    "stress": 0.79,
+    "energy": 0.45,
+    "money": 2200.0,
+    "relationship": 0.66,
+    "sleep_hours": 4.8
+  },
+  "tasks": [
+    {"id": "f1", "title": "Book emergency travel", "deadline_hours": 3, "priority": 5, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "f2", "title": "Ship code patch", "deadline_hours": 8, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "f3", "title": "Coordinate hospital docs", "deadline_hours": 6, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "f4", "title": "Inform manager", "deadline_hours": 4, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "f5", "title": "Arrange pet care", "deadline_hours": 10, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "f6", "title": "Sleep recovery", "deadline_hours": 12, "priority": 5, "remaining_effort": 2.0, "status": "todo"},
+    {"id": "f7", "title": "Pay credit bill", "deadline_hours": 20, "priority": 3, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "f8", "title": "Call sibling", "deadline_hours": 7, "priority": 4, "remaining_effort": 1.0, "status": "todo"},
+    {"id": "f9", "title": "Reschedule meetings", "deadline_hours": 9, "priority": 4, "remaining_effort": 1.5, "status": "todo"},
+    {"id": "f10", "title": "Pack essentials", "deadline_hours": 5, "priority": 4, "remaining_effort": 1.0, "status": "todo"}
+  ],
+  "events": [
+    {"timestep": 1, "event_type": "doctor_update", "description": "Hospital asks for urgent document.", "impact": {"stress": 0.08}},
+    {"timestep": 5, "event_type": "flight_delay", "description": "Flight delayed by weather.", "impact": {"stress": 0.06, "energy": -0.05}},
+    {"timestep": 9, "event_type": "work_ping", "description": "Critical bug reported from production.", "impact": {"stress": 0.08}},
+    {"timestep": 15, "event_type": "relative_support", "description": "Relative helps with logistics.", "impact": {"stress": -0.07, "relationship": 0.08}},
+    {"timestep": 21, "event_type": "extra_taxi", "description": "Higher travel expenses.", "impact": {"money": -150.0}}
+  ]
+}
