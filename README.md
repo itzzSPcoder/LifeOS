@@ -5,7 +5,7 @@ colorFrom: purple
 colorTo: indigo
 sdk: gradio
 sdk_version: 6.13.0
-app_file: spaces_app.py
+app_file: web_app.py
 pinned: false
 tags:
 - openenv
