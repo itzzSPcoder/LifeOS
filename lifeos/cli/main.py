@@ -97,6 +97,7 @@ def _run_episode(scenario_name: str, agent: str, model: str | None = None, show_
 @click.option("--episodes", type=int, default=100, show_default=True, help="Training episodes")
 @click.option("--demo", is_flag=True, help="Run scripted Rahul demo")
 @click.option("--custom-nlp", is_flag=True, help="Describe your chaos in natural language to run a custom simulation")
+@click.option("--tui", is_flag=True, help="Launch the full-screen interactive Terminal UI (TUI)")
 def cli(
     setup: bool,
     list_scenarios: bool,
@@ -108,10 +109,18 @@ def cli(
     episodes: int,
     demo: bool,
     custom_nlp: bool,
+    tui: bool,
 ) -> None:
+    if tui:
+        _ensure_setup()
+        from lifeos.tui.app import LifeOSDashboard
+        app = LifeOSDashboard()
+        app.run()
+        return
+
     display.print_banner()
     
-    if not any([setup, list_scenarios, scenario, agent, compare, train, demo, custom_nlp]):
+    if not any([setup, list_scenarios, scenario, agent, compare, train, demo, custom_nlp, tui]):
         _ensure_setup()
         scenarios_db = repository.get_scenarios()
         click.secho("\n[root@lifeos:~#] SELECT SCENARIO:", fg="green", bold=True)

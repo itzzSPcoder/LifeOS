@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+COPY requirements_spaces.txt /app/requirements_spaces.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements_spaces.txt
+
+COPY lifeos/ /app/lifeos/
+COPY openenv.yaml /app/openenv.yaml
+COPY spaces/ /app/spaces/
+
+EXPOSE 8200 7860
+
+# Default: start the OpenEnv FastAPI server
+CMD ["uvicorn", "lifeos.envs.server:app", "--host", "0.0.0.0", "--port", "8200"]

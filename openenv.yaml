@@ -1,0 +1,89 @@
+# LifeOS OpenEnv Manifest
+# https://github.com/meta-pytorch/OpenEnv
+
+name: lifeos-personal-chaos-agent
+version: "1.0.0"
+description: >
+  LifeOS: The Personal Chaos Agent — an RL environment where an LLM must
+  handle cascading personal life conflicts in real time. The agent navigates
+  calendar clashes, inbox pressure, energy management, budget surprises,
+  and random chaos events to learn effective personal task handling.
+
+entry_point: lifeos.envs.server:app
+environment_class: lifeos.envs.student_week_openenv:StudentWeekEnv
+
+theme: personalized_tasks
+
+action_space:
+  type: structured
+  actions:
+    - reply_message:
+        params: [target_id, tone, content_summary]
+        description: "Reply to a pending message with a chosen tone and summary."
+    - reschedule_event:
+        params: [target_id, new_time, reason]
+        description: "Reschedule a calendar event to a new time with a reason."
+    - prioritize_task:
+        params: [target_id, urgency_level]
+        description: "Work on a task with a given urgency (1-5). Higher urgency = more effort per step."
+    - delegate_task:
+        params: [target_id, reason]
+        description: "Delegate a task to someone else (costs budget)."
+    - decline_event:
+        params: [target_id, reason]
+        description: "Decline a calendar event (hurts relationship score)."
+    - rest:
+        params: []
+        description: "Rest to recover energy and reduce stress. Passes one time step."
+
+observation_space:
+  type: structured
+  fields:
+    current_step: {type: int, range: [0, 30]}
+    max_steps: {type: int}
+    energy: {type: int, range: [0, 100]}
+    stress: {type: int, range: [0, 100]}
+    budget: {type: float}
+    relationship_score: {type: float, range: [0.0, 1.0]}
+    calendar: {type: list, item: CalendarEvent}
+    inbox: {type: list, item: Message}
+    tasks: {type: list, item: Task}
+    active_chaos: {type: list, item: ChaosEvent}
+    recent_action_log: {type: list, item: string}
+
+reward_range: [-10.0, 10.0]
+max_steps: 30
+
+reward_functions:
+  - name: task_completion
+    file: lifeos/rewards/task_completion_reward.py
+    description: "Rewards meeting deadlines, penalizes misses and unnecessary delegation."
+  - name: social_coherence
+    file: lifeos/rewards/social_coherence_reward.py
+    description: "Rewards timely replies and rescheduling with valid reasons."
+  - name: energy_sustainability
+    file: lifeos/rewards/energy_sustainability_reward.py
+    description: "Rewards maintaining energy above 40 and proactive rest."
+  - name: format_compliance
+    file: lifeos/rewards/format_compliance_reward.py
+    description: "Validates action schema, blocks anti-hack attempts."
+
+anti_hacking:
+  step_timeout_seconds: 30
+  loop_detection: true
+  loop_penalty: -0.5
+  protected_state_access_penalty: -1.0
+  chaos_queue_locked: true
+
+deployment:
+  dockerfile: Dockerfile.openenv
+  port: 8200
+  huggingface_space: true
+
+training:
+  algorithm: GRPO
+  library: trl
+  optimizer: unsloth
+  base_model: mistralai/Mistral-7B-Instruct-v0.3
+  episodes: 50
+  adapter_output: outputs/lifeos-grpo-adapter/
