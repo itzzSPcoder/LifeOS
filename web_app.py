@@ -11,8 +11,8 @@ def run_episode():
                     env = LifeOSGymEnv()
                     obs, info = env.reset()
                     return "Simulation started. Obs: " + str(obs)
-except Exception as e:
-        return f"Error: {str(e)}"
+    except Exception as e:
+                return f"Error: {str(e)}"
 
 with gr.Blocks() as demo:
         gr.Markdown("# LifeOS Demo")
