@@ -9,6 +9,7 @@ from lifeos.db import repository
 from lifeos.env.lifeos_env import LifeOSEnv
 from lifeos.scenarios.loader import load_scenario
 from lifeos.training.train import run_training
+from lifeos.scenarios import nlp_parser
 
 
 def _ensure_setup() -> None:
@@ -17,7 +18,7 @@ def _ensure_setup() -> None:
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _run_episode(scenario_name: str, agent: str, model: str | None = None) -> dict[str, float]:
+def _run_episode(scenario_name: str, agent: str, model: str | None = None, show_score: bool = True) -> dict[str, float]:
     _ensure_setup()
     scenario_row = repository.get_scenario_by_name(scenario_name)
     if not scenario_row:
@@ -73,13 +74,15 @@ def _run_episode(scenario_name: str, agent: str, model: str | None = None) -> di
         balance=balance,
     )
     scores = {
+        "episode_id": episode.id,
         "total_reward": env.total_reward,
         "productivity": productivity,
         "wellbeing": wellbeing,
         "trust": trust,
         "balance": balance,
     }
-    display.show_score_card(scores)
+    if show_score:
+        display.show_score_card(scores)
     return scores
 
 
@@ -93,6 +96,7 @@ def _run_episode(scenario_name: str, agent: str, model: str | None = None) -> di
 @click.option("--train", is_flag=True, help="Run local training simulation")
 @click.option("--episodes", type=int, default=100, show_default=True, help="Training episodes")
 @click.option("--demo", is_flag=True, help="Run scripted Rahul demo")
+@click.option("--custom-nlp", is_flag=True, help="Describe your chaos in natural language to run a custom simulation")
 def cli(
     setup: bool,
     list_scenarios: bool,
@@ -103,7 +107,32 @@ def cli(
     train: bool,
     episodes: int,
     demo: bool,
+    custom_nlp: bool,
 ) -> None:
+    display.print_banner()
+    
+    if not any([setup, list_scenarios, scenario, agent, compare, train, demo, custom_nlp]):
+        _ensure_setup()
+        scenarios_db = repository.get_scenarios()
+        click.secho("\n[root@lifeos:~#] SELECT SCENARIO:", fg="green", bold=True)
+        for i, s in enumerate(scenarios_db, 1):
+            click.echo(f"  {i}. {s.display_name} ({s.name})")
+        
+        other_index = len(scenarios_db) + 1
+        click.echo(f"  {other_index}. Other (Custom Chaos via AI)")
+        
+        choice = click.prompt("\n> Enter choice (number)", type=int)
+        if choice == other_index:
+            custom_nlp = True
+        elif 1 <= choice <= len(scenarios_db):
+            selected = scenarios_db[choice - 1]
+            click.secho(f"\n[root@lifeos:~#] Executing {selected.name}...", fg="green")
+            _run_episode(selected.name, "heuristic")
+            return
+        else:
+            click.secho("[ERROR] Invalid choice.", fg="red")
+            return
+
     if setup:
         _ensure_setup()
         total = len(repository.get_scenarios())
@@ -153,6 +182,36 @@ def cli(
         if scenario_row:
             comp = repository.get_comparison_for_scenario(scenario_row.id)
             display.show_comparison(comp.get("heuristic"), comp.get("ppo"))
+
+    if custom_nlp:
+        _ensure_setup()
+        click.secho("\n[root@lifeos:~#] ENTER YOUR LIFE CHAOS (Press Enter when done):", fg="green", bold=True)
+        user_text = input("> ")
+        click.secho("\n[root@lifeos:~#] Generating REAL Chaos using local Qwen3.5...", fg="yellow")
+        try:
+            with display.Spinner("Parsing Chaos with Llama3.2"):
+                scenario_data = nlp_parser.generate_scenario_from_text(user_text)
+            click.secho("[OK] JSON parsed successfully. Building scenario...", fg="green")
+            # Save the dynamically generated scenario
+            repository.create_scenario_from_dict(scenario_data)
+            scores = _run_episode("custom_chaos", "heuristic", show_score=False)
+            
+            payload = repository.get_episode_payload(scores["episode_id"])
+            if payload:
+                actions = payload.get("actions", [])
+                action_types = [a["action_type"] for a in actions[:50]]
+                
+                with display.Spinner("Generating Actionable Survival Guide"):
+                    report = nlp_parser.generate_actionable_report(user_text, action_types)
+                
+                click.secho("\n[root@lifeos:~#] cat /var/log/survival_guide.txt", fg="green", bold=True)
+                click.secho(report, fg="cyan")
+                
+            display.show_score_card(scores)
+            click.echo("")
+                
+        except Exception as e:
+            click.secho(f"[ERROR] {e}", fg="red")
 
 
 if __name__ == "__main__":

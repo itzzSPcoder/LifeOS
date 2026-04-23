@@ -153,11 +153,12 @@ class LifeOSEnv:
                 self._apply_event_impact(scripted_event)
                 triggered_events.append(scripted_event)
 
-        random_event = maybe_inject_random_event()
-        if random_event:
-            self._apply_event_impact(random_event)
-            random_event = {**random_event, "is_random": True, "timestep": self.timestep}
-            triggered_events.append(random_event)
+        if self.scenario.get("name") != "custom_chaos":
+            random_event = maybe_inject_random_event()
+            if random_event:
+                self._apply_event_impact(random_event)
+                random_event = {**random_event, "is_random": True, "timestep": self.timestep}
+                triggered_events.append(random_event)
 
         deadline_penalty = self._handle_deadlines()
 

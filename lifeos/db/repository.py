@@ -55,6 +55,31 @@ def get_scenario_by_id(scenario_id: int) -> Scenario | None:
         return db.get(Scenario, scenario_id)
 
 
+def create_scenario_from_dict(scenario: dict[str, Any]) -> Scenario:
+    with SessionLocal() as db:
+        existing = db.scalar(select(Scenario).where(Scenario.name == scenario["name"]))
+        if existing:
+            existing.display_name = scenario.get("display_name", "Custom Scenario")
+            existing.profile_json = scenario.get("profile", {})
+            existing.tasks_json = scenario.get("tasks", [])
+            existing.events_json = scenario.get("events", [])
+            db.commit()
+            db.refresh(existing)
+            return existing
+        new_scenario = Scenario(
+            name=scenario.get("name", "custom_chaos"),
+            display_name=scenario.get("display_name", "Custom Scenario"),
+            profile_json=scenario.get("profile", {}),
+            tasks_json=scenario.get("tasks", []),
+            events_json=scenario.get("events", []),
+        )
+        db.add(new_scenario)
+        db.commit()
+        db.refresh(new_scenario)
+        return new_scenario
+
+
+
 def create_episode(scenario_id: int, agent_type: str) -> Episode:
     with SessionLocal() as db:
         episode = Episode(scenario_id=scenario_id, agent_type=agent_type)
