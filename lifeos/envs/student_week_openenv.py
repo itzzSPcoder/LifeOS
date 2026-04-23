@@ -21,6 +21,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from lifeos.rewards.task_completion_reward import compute as reward_task
+from lifeos.rewards.task_completion_reward import reset_tracking as reset_task_tracking
 from lifeos.rewards.social_coherence_reward import compute as reward_social
 from lifeos.rewards.energy_sustainability_reward import compute as reward_energy
 from lifeos.rewards.format_compliance_reward import compute as reward_format
@@ -224,6 +225,7 @@ class StudentWeekEnv:
 
     def reset(self) -> Observation:
         """Start a fresh episode. Returns initial observation."""
+        reset_task_tracking()
         self._episode_id = f"ep_{random.randint(10000, 99999)}"
         self._current_step = 0
         self._done = False
@@ -338,15 +340,14 @@ class StudentWeekEnv:
         if self._done:
             # Penalize unanswered messages at episode end
             unanswered = [m for m in self._inbox if not m.replied]
-            end_social_penalty = len(unanswered) * (-0.8)
+            end_social_penalty = len(unanswered) * (-0.3)
             r_social += end_social_penalty
             step_reward += end_social_penalty
 
-            # Penalize missed tasks at episode end
-            missed = [t for t in self._tasks if t.status == "missed"]
-            end_task_penalty = len(missed) * (-1.0)
-            r_task += end_task_penalty
-            step_reward += end_task_penalty
+            # Note: missed tasks are already penalized per-step when
+            # their deadline passes in _check_deadline_misses() +
+            # the reward function. No additional end-of-episode penalty
+            # to avoid double-counting.
 
         self._cumulative_rewards["task_completion"] += r_task
         self._cumulative_rewards["social_coherence"] += r_social

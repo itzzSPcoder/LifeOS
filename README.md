@@ -72,7 +72,7 @@ Anti-hacking safeguards: 30s step timeout (-2.0), action loop detection (-0.5), 
 
 ## Results
 
-![Reward curves showing composite and per-function reward improvement over 50 training episodes](outputs/reward_curves.png)
+![Reward curves showing composite and per-function reward improvement over 50 training episodes](lifeos/outputs/reward_curves.png)
 
 > Composite reward improved from **-2.8** (heuristic baseline) to **+1.4** (trained agent) over 50 episodes.
 
@@ -167,9 +167,9 @@ Dockerfile.openenv           # HF Spaces deployment
 
 ## Links
 
-- 🤗 HuggingFace Space: *[deployment pending]*
+- 🤗 HuggingFace Space: [LifeOS — Personal Chaos Agent](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen)
 - 📝 Mini-blog: [docs/hf_blog.md](docs/hf_blog.md)
-- 🎥 Demo video: *[recording pending]*
+- 🎥 Demo: Try the interactive demo on the HuggingFace Space above
 
 ---
 

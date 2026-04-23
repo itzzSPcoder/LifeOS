@@ -3,13 +3,19 @@
 
 # Python
 .venv/
+.venv311/
 __pycache__/
 *.pyc
 .pytest_cache/
+*.egg-info/
 
 # Local artifacts
 lifeos/data/*.db
 lifeos/outputs/*
 !lifeos/outputs/.gitkeep
+!lifeos/outputs/reward_curves.png
 models/*
 !models/.gitkeep
+
+# Binary files (prevent HF push rejection)
+*.docx
