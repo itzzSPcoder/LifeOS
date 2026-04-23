@@ -4,7 +4,7 @@ import gradio as gr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from lifeos.training.lifeos_gym_env import LifeOSGymEnv
+from lifeos.envs.student_week_openenv import LifeOSGymEnv
 
 def run_episode():
         try:
