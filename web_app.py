@@ -21,5 +21,5 @@ with gr.Blocks() as demo:
         run_btn.click(run_episode, outputs=output)
 
     if __name__ == "__main__":
-            demo.launch()
+                demo.launch()
         
