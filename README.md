@@ -1,3 +1,22 @@
+---
+title: "LifeOS - Personal Chaos Agent"
+emoji: 🧠
+colorFrom: purple
+colorTo: indigo
+sdk: gradio
+sdk_version: "4.30.0"
+app_file: spaces_app.py
+pinned: false
+tags:
+  - openenv
+  - rl
+  - llm-training
+  - personalized-tasks
+  - reinforcement-learning
+  - life-simulation
+license: mit
+---
+
 # LifeOS — Teaching LLMs to Handle Real-Life Chaos
 
 > An OpenEnv-compliant RL environment for training LLMs to manage cascading personal life conflicts.
