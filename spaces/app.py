@@ -14,6 +14,7 @@ import json
 import random
 import sys
 import os
+import pandas as pd
 
 # Ensure the project root is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -188,13 +189,18 @@ def _format_obs(obs) -> str:
     return "\n".join(lines)
 
 
-def run_episode(agent_type: str) -> tuple[str, str, str]:
-    """Run a full episode and return formatted results."""
+def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame]:
+    """Run a full episode and return formatted results along with graph data."""
     env = StudentWeekEnv(max_steps=30, chaos_probability=0.20)
     obs = env.reset()
 
     history_lines = []
     step_count = 0
+    plot_data = []
+
+    # Record initial state
+    plot_data.append({"Step": 0, "Metric": "Energy", "Value": obs.energy})
+    plot_data.append({"Step": 0, "Metric": "Stress", "Value": obs.stress})
 
     action_emojis = {
         "rest": "😴", "reply_message": "💬", "prioritize_task": "📌",
@@ -211,6 +217,9 @@ def run_episode(agent_type: str) -> tuple[str, str, str]:
 
         obs, reward, done, info = env.step(action)
         step_count += 1
+
+        plot_data.append({"Step": step_count, "Metric": "Energy", "Value": obs.energy})
+        plot_data.append({"Step": step_count, "Metric": "Stress", "Value": obs.stress})
 
         rc = info.get("reward_components", {})
         action_str = f"{action.action_type}"
@@ -235,6 +244,9 @@ def run_episode(agent_type: str) -> tuple[str, str, str]:
 
     final_state = env.state
     final_obs = _format_obs(obs)
+
+    # DataFrame for Gradio LinePlot
+    df = pd.DataFrame(plot_data)
 
     # History table
     history_header = [
@@ -287,7 +299,7 @@ def run_episode(agent_type: str) -> tuple[str, str, str]:
         f"| 😰 Final Stress | **{final_state.stress}** |",
     ])
 
-    return final_obs, history_str, "\n".join(summary_lines)
+    return final_obs, history_str, "\n".join(summary_lines), df
 
 
 CUSTOM_CSS = """
@@ -391,6 +403,17 @@ with gr.Blocks(
             )
         with gr.Column(scale=1):
             summary_md = gr.Markdown(value="", label="📊 Episode Summary")
+            gr.Markdown("### 📈 Dynamic Vitals Plot")
+            metrics_plot = gr.LinePlot(
+                x="Step", 
+                y="Value", 
+                color="Metric", 
+                title="Energy & Stress Trajectory", 
+                height=300, 
+                width=500, 
+                y_title="Level (0-100)",
+                x_title="Episode Step"
+            )
 
     with gr.Accordion("📜 Step-by-Step Action History", open=False):
         history_md = gr.Markdown(value="")
@@ -411,7 +434,7 @@ with gr.Blocks(
     run_btn.click(
         fn=run_episode,
         inputs=[agent_dropdown],
-        outputs=[final_state_md, history_md, summary_md],
+        outputs=[final_state_md, history_md, summary_md, metrics_plot],
     )
 
 
