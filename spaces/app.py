@@ -409,8 +409,6 @@ with gr.Blocks(
                 y="Value", 
                 color="Metric", 
                 title="Energy & Stress Trajectory", 
-                height=300, 
-                width=500, 
                 y_title="Level (0-100)",
                 x_title="Episode Step"
             )
