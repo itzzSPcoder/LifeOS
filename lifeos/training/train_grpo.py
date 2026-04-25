@@ -269,7 +269,7 @@ def run_real_grpo_training(cfg: GRPOConfig) -> tuple[list[float], list[dict[str,
     dataset = Dataset.from_dict({"prompt": prompts})
 
     # ── Reward function for GRPO ──
-    def reward_fn(completions: list[str], prompts: list[str]) -> list[float]:
+    def reward_fn(completions: list[str], prompts: list[str], **kwargs) -> list[float]:
         rewards = []
         for completion in completions:
             env = StudentWeekEnv(max_steps=cfg.max_steps, chaos_probability=0.0)
