@@ -73,7 +73,13 @@ At every step, there's a **35% probability** that something unexpected happens. 
 
 We built 23 unique chaos events across five categories:
 
-![Chaos Categories](docs/Starting.png)
+| Category | Examples |
+|---|---|
+| **Academic** | Surprise quiz tomorrow, group member flaked, professor wants an urgent meeting |
+| **Financial** | Laptop charger broke (₹800), forgot to cancel free trial (₹999), old freelance payment arrived (₹1500) |
+| **Tech** | Wi-Fi outage, Windows forced an update, Word crashed — lost 1 hour of work |
+| **Social** | Mom sent a care package, roommate conflict, pointless friend-group drama |
+| **Health** | Mild fever, neighbors partied till 3 AM, surprisingly great workout |
 
 Some events are good. Most are bad. All are unpredictable. This is what makes LifeOS feel less like a benchmark and more like a compressed week of real life.
 
@@ -139,7 +145,7 @@ This shifted optimization pressure toward actual competence rather than loophole
 
 LifeOS was built as a complete, modular pipeline. By separating the environment core, the reward logic, and the training loop across a decoupled FastAPI architecture, we ensured the system can be scaled, inspected, and deployed seamlessly.
 
-![Architecture](docs/Screenshot%202026-04-26%20144058.png)
+![Architecture](docs/Architecture.png)
 
 ---
 
