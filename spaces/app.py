@@ -184,6 +184,63 @@ def generate_ics(obs_dict: dict) -> str:
     return file_path
 
 
+def generate_calendar_html(obs_dict: dict) -> str:
+    """Generate a beautiful HTML timeline of the agent's scheduled events and completed tasks."""
+    events = []
+    
+    # Add Calendar Events
+    for c in obs_dict.get("calendar", []):
+        if not c.get("is_declined"):
+            events.append({
+                "hour": c.get("scheduled_hour", 0),
+                "title": c.get("title", "Event"),
+                "desc": f"Duration: {c.get('duration_hours', 1)}h",
+                "type": "event",
+                "icon": "📅",
+                "color": "#e0f2fe",      # light blue
+                "border": "#0284c7"      # dark blue
+            })
+            
+    # Add Completed Tasks
+    for i, t in enumerate(obs_dict.get("tasks", [])):
+        if t.get("status") == "done":
+            # Assign a pseudo-hour based on priority/completion to scatter them
+            pseudo_hour = 8 + (i * 2) % 12 
+            events.append({
+                "hour": pseudo_hour,
+                "title": t.get("title", "Task"),
+                "desc": "Task Completed",
+                "type": "task",
+                "icon": "✅",
+                "color": "#dcfce7",      # light green
+                "border": "#16a34a"      # dark green
+            })
+            
+    # Sort chronologically by hour
+    events.sort(key=lambda x: x["hour"])
+    
+    html = "<div style='display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding: 10px;'>"
+    
+    if not events:
+        return "<div style='padding: 20px; text-align: center; color: #64748b;'>No events or completed tasks yet.</div>"
+        
+    for ev in events:
+        time_str = f"{ev['hour']}:00" if ev['hour'] > 9 else f"0{ev['hour']}:00"
+        html += f"""
+        <div style='background: {ev["color"]}; padding: 12px 16px; border-radius: 8px; border-left: 5px solid {ev["border"]}; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>
+            <div style='font-weight: 700; color: #334155; min-width: 50px;'>{time_str}</div>
+            <div style='font-size: 1.5em;'>{ev["icon"]}</div>
+            <div style='flex-grow: 1;'>
+                <div style='font-weight: 600; color: #0f172a; font-size: 1.05em;'>{ev["title"]}</div>
+                <div style='color: #475569; font-size: 0.85em; margin-top: 2px;'>{ev["desc"]}</div>
+            </div>
+        </div>
+        """
+        
+    html += "</div>"
+    return html
+
+
 def _format_obs(obs) -> str:
     if hasattr(obs, "model_dump"):
         d = obs.model_dump()
@@ -242,7 +299,7 @@ def _format_obs(obs) -> str:
     return "\n".join(lines)
 
 
-def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame, str]:
+def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame, str, str]:
     """Run a full episode and return formatted results along with graph data."""
     env = StudentWeekEnv(max_steps=30, chaos_probability=0.35)
     obs = env.reset()
@@ -356,8 +413,9 @@ def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame, str]:
     ])
     
     ics_file_path = generate_ics(obs_dict)
+    calendar_html = generate_calendar_html(obs_dict)
 
-    return final_obs, history_str, "\n".join(summary_lines), df, ics_file_path
+    return final_obs, history_str, "\n".join(summary_lines), df, calendar_html, ics_file_path
 
 
 CUSTOM_CSS = """
@@ -463,8 +521,9 @@ with gr.Blocks(
         with gr.Column(scale=1):
             summary_md = gr.Markdown(value="", label="📊 Episode Summary")
             
-            with gr.Accordion("🗓️ Export Final Schedule", open=True):
-                gr.Markdown("Download the agent's finalized schedule and completed tasks directly to your personal calendar!")
+            with gr.Accordion("🗓️ Agent's Final Schedule View", open=True):
+                gr.Markdown("View the agent's finalized schedule and completed tasks below, or download them directly to your personal calendar!")
+                calendar_view = gr.HTML(label="Visual Timeline")
                 ics_download = gr.File(label="Download .ics Calendar", interactive=False)
             
             gr.Markdown("### 📈 Dynamic Vitals Plot")
@@ -496,7 +555,7 @@ with gr.Blocks(
     run_btn.click(
         fn=run_episode,
         inputs=[agent_dropdown],
-        outputs=[final_state_md, history_md, summary_md, metrics_plot, ics_download],
+        outputs=[final_state_md, history_md, summary_md, metrics_plot, calendar_view, ics_download],
     )
 
 
