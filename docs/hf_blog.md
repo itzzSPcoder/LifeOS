@@ -1,209 +1,285 @@
 ---
-title: "LifeOS: Teaching an LLM to Survive Your Worst Week"
+title: "LifeOS: Training LLMs for the Chaos Between Deadlines and Real Life"
 thumbnail: docs/reward_curves.png
 date: "2026-04-26"
 tags: [openenv, reinforcement-learning, trl, unsloth, gradio, grpo, life-simulation]
 author: SParsh003
 ---
 
-# LifeOS: Teaching an LLM to Survive Your Worst Week
+# LifeOS: Training LLMs for the Chaos Between Deadlines and Real Life
 
-It's 11 PM on a Tuesday. Your assignment deadline just moved up by two days. Your best friend is furious because you forgot to reply to their message. Your laptop charger broke — ₹800 gone. You have 30% energy left, and if you push through without sleeping, you'll burn out completely.
+Large language models can write code, solve math, and summarize entire books.
+But ask them to survive a messy week like a real human, and many of them fail in ways that feel immediately familiar.
 
-What do you do?
+Not because they are "not smart enough."
+Because life is not a single-objective optimization problem.
 
-This is the kind of question LLMs are *terrible* at answering. Not because they lack intelligence, but because they've never been trained in an environment where **every decision has cascading social, temporal, and physical consequences.** Code completion? Solved. Math reasoning? Getting there. But navigating the beautiful chaos of being a real human? That's still an open problem.
+A student has an assignment due tonight. A friend is waiting for a reply. Sleep debt is rising. An unexpected expense appears. A meeting gets rescheduled.
+In that moment, success is not "perfect completion." It is **making the least damaging trade-off**.
 
-LifeOS is our attempt to close that gap. We built an OpenEnv-compliant reinforcement learning environment that simulates the most stressful week of a college student's life — and then used GRPO to teach Mistral-7B how to survive it.
-
-[👉 Try the live demo](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) · [📦 Trained model weights](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) · [💻 Source code](https://github.com/itzzSPcoder/LifeOS)
-
----
-
-## Why this matters
-
-Ask ChatGPT to "plan my week" and you'll get a neat little table. Monday 9 AM: Study. Monday 2 PM: Gym. It looks great on paper. But the moment your roommate starts a fight at midnight, or your professor moves a quiz up by three days, or you realize you haven't eaten since morning and your energy is crashing — that plan is worthless.
-
-The fundamental issue is that current LLMs treat personal task management as a static optimization problem. Arrange items on a timeline. Done. But real life isn't static. It's a **dynamic system with hidden variables, stochastic disruptions, and multi-objective trade-offs** that change every hour.
-
-We needed an environment that captures this. Not a toy problem. Not a simplified calendar. A full simulation where the agent feels the *weight* of its decisions — where ignoring a friend's message costs relationship points, where pushing through exhaustion leads to burnout, and where a random chaos event can invalidate your entire strategy in one step.
+That gap is why we built **LifeOS**.
 
 ---
 
-## The environment: 30 steps of pure chaos
+## Why this project matters
 
-LifeOS simulates a single week as 30 discrete time steps. At each step, the agent receives a structured observation:
+Most benchmarks reward isolated correctness: one prompt, one answer, one metric.
+But personal decision-making is long-horizon and multi-objective:
 
-```
-📊 Step 14 / 30
-─────────────
-⚡ Energy: 38/100    😰 Stress: 72/100
-💰 Budget: ₹2,200   🤝 Relationships: 0.55
+- productivity vs well-being,
+- urgency vs relationship trust,
+- short-term output vs long-term sustainability.
 
-📋 Pending Tasks: 4 (nearest deadline: 2 steps away)
-📬 Unread Messages: 2 (one marked "angry")
-📅 Calendar Conflicts: 1 overlap detected
-🌪️ Active Chaos: "Group member flaked on their part of the project"
-```
+If we want useful personal AI systems, we need environments where agents learn to balance competing constraints, not just maximize one score.
 
-The agent must respond with one of six structured actions — not free text, not a chat response, but a typed JSON command:
+LifeOS is our attempt to make that challenge measurable, trainable, and debuggable.
 
-| Action | What it does |
-|---|---|
-| `prioritize_task` | Spend energy working on a task |
-| `reply_message` | Respond to an inbox message (costs time) |
-| `reschedule_event` | Move a calendar event (requires a reason) |
-| `delegate_task` | Pay ₹150 from budget to offload work |
-| `decline_event` | Cancel an event (hurts relationships) |
-| `rest` | Do nothing. Recover energy. Accept the trade-off. |
+It is a strict [OpenEnv](https://github.com/meta-pytorch/OpenEnv)-compliant reinforcement learning environment that simulates a compressed, chaotic student week — and uses [GRPO](https://huggingface.co/docs/trl/main/en/grpo_trainer) to teach `Mistral-7B` how to navigate it.
 
-Every action has consequences. `prioritize_task` drains energy. `delegate_task` drains budget. `decline_event` damages relationships. `rest` means a deadline gets one step closer. There is no free lunch.
+[👉 Try the live demo](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) · [📦 Trained model](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) · [💻 Source code](https://github.com/itzzSPcoder/LifeOS)
+
+---
+
+## The journey: from simple simulation to human-like pressure
+
+### Phase 1: "Just build an environment"
+
+Our first versions looked reasonable on paper: tasks, deadlines, a few actions, a scalar reward.
+Agents learned quickly — and then exploited shortcuts just as quickly.
+
+We saw classic failure modes:
+- over-indexing on one metric (energy hoarding via infinite `rest()`),
+- ignoring social debt entirely (never replying to messages),
+- delaying recovery until catastrophic burnout,
+- repeating valid-looking actions in loops to farm reward.
+
+That was the turning point. We realized we were not building a toy simulator — we were building a **judgment environment**. A place where doing the "correct" thing depends entirely on context, timing, and what you're willing to sacrifice.
+
+### Phase 2: model consequences, not just actions
+
+We redesigned the world so every decision carries a downstream cost:
+
+- **Tasks slip.** Every step you don't work on a task, its deadline gets closer. Miss it, and you lose -1.0.
+- **Messages age.** An unread message from a friend doesn't just sit there — it accumulates social debt. By episode end, every ignored message costs -0.8.
+- **Energy and stress drift** even when nothing dramatic happens. The simulation bleeds energy naturally, so the agent can never stand still.
+- **Budget is finite.** Delegating costs ₹150. Chaos events can wipe ₹800–₹999 in one step.
+- **Relationships are fragile.** Declining an event, ignoring a message, or getting pulled into drama — each one erodes a score that's hard to rebuild.
+
+Then we added the chaos engine.
 
 ### The chaos engine
 
-Here's what makes LifeOS different from a planning benchmark: **the chaos engine.** At every step, there's a 35% probability that something unexpected happens. The agent can't see the chaos queue. It can't prepare. It can only react.
+At every step, there's a **35% probability** that something unexpected happens. The agent cannot see the chaos queue. It cannot prepare. It can only react.
 
 We built 23 unique chaos events across five categories:
 
-- **Academic**: Surprise quiz tomorrow, group member flaked, professor wants an urgent meeting
-- **Financial**: Laptop charger broke (₹800), forgot to cancel a free trial (₹999 auto-charged), found ₹500 in old jeans
-- **Tech**: Wi-Fi outage, Windows forced an update during peak hours, Word crashed and you lost an hour of work
-- **Social**: Mom sent a care package (+energy, +relationship), roommate conflict, friend-group drama
-- **Health**: Mild fever, terrible sleep from noisy neighbors, surprisingly great workout session
+| Category | Examples |
+|---|---|
+| **Academic** | Surprise quiz tomorrow, group member flaked, professor wants an urgent meeting |
+| **Financial** | Laptop charger broke (₹800), forgot to cancel free trial (₹999), old freelance payment arrived (₹1500) |
+| **Tech** | Wi-Fi outage, Windows forced an update, Word crashed — lost 1 hour of work |
+| **Social** | Mom sent a care package, roommate conflict, pointless friend-group drama |
+| **Health** | Mild fever, neighbors partied till 3 AM, surprisingly great workout |
 
-Some events are good. Most are bad. All are unpredictable. This is what makes LifeOS feel *real*.
+Some events are good. Most are bad. All are unpredictable. This is what makes LifeOS feel less like a benchmark and more like a compressed week of real life.
+
+### Phase 3: break reward into independent channels
+
+One scalar reward wasn't enough.
+So LifeOS uses **four independent reward components**:
+
+| Signal | What it measures | Failure mode it prevents |
+|---|---|---|
+| Task Completion | Deadlines met vs missed | Agents that rest endlessly |
+| Social Coherence | Message reply timeliness | Agents that ignore people |
+| Energy Sustainability | Burnout avoidance, proactive rest | Agents that grind to death |
+| Format Compliance | Valid action schema, anti-hack | Agents that game the system |
+
+This gave us two major wins:
+- better learning signals for the agent,
+- clearer debugging signals for humans.
+
+When an episode goes wrong, we can see *which dimension collapsed* and why.
+
+![Training reward curves showing composite and per-function improvement over episodes](reward_curves.png)
 
 ---
 
-## The reward problem: why four signals beat one
+## The design decisions that changed everything
 
-The biggest design challenge wasn't building the environment. It was designing rewards that couldn't be hacked.
+### Structured actions over free-form intent
 
-Early in development, we tried a single composite reward. The agent immediately found the exploit: spam `rest()` every turn. Energy stays high, stress stays low, score looks great. Never mind that every deadline was missed and every friend was ignored.
+Instead of unconstrained natural language, the agent must output a typed action at each step:
 
-This is reward hacking, and it's the reason LifeOS uses **four independent reward functions**, each measuring a different dimension of "surviving the week":
+```json
+{
+  "action_type": "reply_message",
+  "target_id": "msg_03",
+  "tone": "apologetic",
+  "content_summary": "Sorry for the late reply, been swamped with deadlines."
+}
+```
 
-**1. Task Completion** — Did you meet your deadlines?
-- +1.0 for completing a task before its deadline
-- -1.0 for every missed deadline
-- -0.5 for delegating low-priority tasks (lazy delegation penalty)
+Six possible actions: `reply_message`, `prioritize_task`, `reschedule_event`, `delegate_task`, `decline_event`, `rest`.
 
-**2. Social Coherence** — Did you maintain your relationships?
-- +0.5 for replying to a message within 1 step
-- -0.8 for every unanswered message at episode end
+Why this mattered:
+- policy behavior became interpretable,
+- validation became strict,
+- error analysis became practical.
 
-**3. Energy Sustainability** — Did you avoid burnout?
-- +0.2 for every step where energy stays above 40
-- +0.4 for proactive rest (resting before energy drops below 30)
-- **-1.5 and instant game over** if energy hits zero
+When the agent makes a bad decision, we know *exactly* what it chose and what it should have chosen instead.
 
-**4. Format Compliance** — Did you output valid commands?
-- +0.1 for well-formed action JSON
-- -0.5 for malformed output
-- -1.0 for attempting to access protected state
+### Anti-hack safeguards early, not later
 
-The key insight: **these signals conflict with each other.** Maximizing task completion means spending energy, which risks burnout. Maintaining relationships means spending time on replies instead of tasks. The agent must learn to *balance*, not maximize — and that's exactly the skill current LLMs lack.
+Reward hacking is not a corner case in RL environments — it is inevitable.
+So we added safeguards from the start:
 
-### Anti-hack safeguards
+- **Action-loop penalties**: Repeating the same action 3+ times costs -0.5.
+- **Timeout penalties**: Taking longer than 30 seconds to respond costs -2.0.
+- **Schema validation**: Malformed JSON costs -0.5. Attempting to access protected state costs -1.0.
+- **Locked chaos queue**: The agent cannot read or modify future events.
 
-We wrapped the reward system in additional protections:
-- **Action loop detection**: Repeating the same action 3+ times triggers a -0.5 penalty
-- **Timeout enforcement**: Taking longer than 30 seconds to respond costs -2.0
-- **State protection**: The chaos queue is locked. The agent cannot read or modify future events.
-- **Independent logging**: All four reward components are logged separately per episode, making any hacking attempt visible in the training curves
+This shifted optimization pressure toward actual competence rather than loopholes.
+
+### Open architecture for real use
+
+LifeOS is not only a training script. It is a full workflow:
+
+```
+Environment Core ──→ FastAPI Server ──→ HTTP Client
+       │                                      │
+       ▼                                      ▼
+  4 Reward Modules              GRPO Training Loop
+       │                                      │
+       ▼                                      ▼
+  Episode Logs ──────→ Gradio Dashboard ──→ Calendar Export
+```
+
+That makes it usable for research experiments *and* hackathon demos *and* actual personal planning exploration.
 
 ---
 
 ## Training: GRPO on a free Colab GPU
 
-We chose **GRPO (Group Relative Policy Optimization)** from HuggingFace TRL for one specific reason: it doesn't require training a separate value model. In environments like LifeOS where rewards are directly verifiable (did you meet the deadline or not?), GRPO is both simpler and more sample-efficient than PPO.
+We chose **GRPO (Group Relative Policy Optimization)** from HuggingFace TRL for one specific reason: it doesn't require training a separate value model. In environments where rewards are directly verifiable — did you meet the deadline or not? — GRPO is both simpler and more sample-efficient than PPO.
 
-The training setup:
-- **Base model**: `mistralai/Mistral-7B-Instruct-v0.3`
-- **Quantization**: 4-bit via Unsloth (fits on a free Colab T4)
-- **Fine-tuning**: LoRA adapters (r=16), not full weight updates
-- **Episodes**: 30 training episodes
-- **Infrastructure**: Google Colab, single T4 GPU, ~40 minutes total
+| Component | Choice |
+|---|---|
+| Base Model | `Mistral-7B-Instruct-v0.3` |
+| Quantization | 4-bit via Unsloth |
+| Fine-tuning | LoRA adapters (r=16) |
+| Trainer | `trl.GRPOTrainer` |
+| Infrastructure | Google Colab, single T4 GPU |
 
-The training loop is straightforward: `env.reset()` → model generates a structured action → `env.step(action)` → four reward signals are computed → GRPO updates the LoRA weights. Repeat for 30 steps per episode, 30 episodes total.
+The training loop: `env.reset()` → model generates structured action → `env.step(action)` → four reward signals computed → GRPO updates LoRA weights. Repeat for 30 steps per episode.
 
-![Training reward curves showing composite and per-function improvement](reward_curves.png)
-
-The reward curves tell the story. Format Compliance climbed first — the model learned to output valid JSON within the first few episodes. Energy Sustainability followed, with the agent discovering that `rest()` exists and prevents the catastrophic -1.5 burnout penalty. Social Coherence improved more slowly, as the model gradually learned the value of timely replies.
-
-The full training notebook is self-contained and runnable: [`lifeos_trl_unsloth_colab.ipynb`](https://github.com/itzzSPcoder/LifeOS/blob/main/lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb). Clone the repo, open in Colab, select T4 runtime, run all cells. No configuration needed.
+The full notebook is self-contained and runnable: [`lifeos_trl_unsloth_colab.ipynb`](https://github.com/itzzSPcoder/LifeOS/blob/main/lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb). Clone, open in Colab, select T4, run all cells. No configuration needed.
 
 ---
 
-## A scenario: watching the agent think
+## The breakthrough: agents learned to balance, not just grind
 
-Let's walk through a real episode to see what the trained agent actually learned.
+The best behavioral shift wasn't "more actions" or "faster completion."
+It was *timing* and *balance*.
 
-**Step 8.** The agent has been steadily working through an urgent Math assignment. Energy is at 35. Stress is climbing.
+Trained policies began to:
+- prioritize near-deadline tasks earlier instead of working alphabetically,
+- respond to social signals before they became penalties,
+- insert recovery *before* burnout spirals, not after,
+- sacrifice low-value tasks (via delegation) to protect high-value ones.
 
-Then the chaos engine fires: *"Assignment deadline moved up by 2 days!"* A History paper that was due Friday is now due tomorrow.
+### A scenario: watching the agent think
+
+**Step 8.** The agent has been working on a Math assignment. Energy is at 35. Stress is climbing.
+
+Then the chaos engine fires: *"Assignment deadline moved up by 2 days."*
 
 **What an untrained model does:**
-Panics. Immediately calls `prioritize_task` on the History paper. Ignores its energy level. By Step 10, energy hits 0. Burnout. Game over. The Math assignment, the History paper, and three unread messages — all abandoned.
+Panics. Immediately calls `prioritize_task` on the new urgent paper. Ignores energy. By Step 10, energy hits 0. Burnout. Game over. Everything abandoned.
 
 **What the trained agent does:**
-It pauses. The inner monologue reads: *"Energy at 35 is dangerous. If I start the History paper now, I'll burn out before finishing. I need to recover first."*
+Pauses. Its inner monologue reads: *"Energy at 35 is dangerous territory. If I push now, I won't finish anyway."*
 
 - **Step 9**: `rest()` — Energy recovers to 65.
-- **Step 10**: `delegate_task` on a minor coding assignment — frees up schedule, costs ₹150.
-- **Step 11**: `reply_message` to the angry friend — clears the social debt in one step.
-- **Step 12**: `prioritize_task` on the History paper at maximum urgency.
+- **Step 10**: `delegate_task` on a minor coding assignment — frees schedule, costs ₹150.
+- **Step 11**: `reply_message` to an angry friend — clears social debt before it compounds.
+- **Step 12**: `prioritize_task` on the urgent paper at maximum urgency.
 
-Result: the History paper gets done. The friend is no longer angry. Energy stays above 30. The agent sacrificed budget and a low-priority task to save everything else. **That's not just planning. That's triage.** And the model learned it entirely from reward signals — no one programmed this strategy.
+The paper gets done. The friend is no longer angry. Energy stays above 30.
+
+That's not planning. That's **triage**. And the model learned it entirely from reward signals.
 
 ---
 
 ## The demo: making RL transparent
 
-We didn't want judges to take our word for it. The [Hugging Face Space](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) lets you run episodes yourself and see exactly what the agent is doing and why.
+We didn't want judges to take our word for it. The [Hugging Face Space](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) lets you run episodes yourself and inspect everything.
 
-Four features make the demo interactive:
+**🧠 Agent Inner Monologue.** At every step, the agent explains its reasoning. You can read the agent's mind as it navigates chaos — *"Stress is at 80%. If I don't rest now, I'll crash."*
 
-**🧠 Agent Inner Monologue.** At every step, the agent outputs a `<thought>` block explaining its reasoning. We parse and render these as speech bubbles in the action history. You can literally read the agent's mind as it navigates chaos.
+**📈 Dynamic Vitals Plot.** A real-time chart tracks Energy and Stress across all 30 steps. Watch the agent deteriorate under pressure, then recover after a well-timed `rest()`.
 
-**📈 Dynamic Vitals Plot.** A real-time line graph tracks Energy and Stress across all 30 steps. You can watch the agent's health deteriorate under pressure, then recover after a well-timed `rest()`.
+**🗓️ Visual Schedule Timeline.** A scrollable HTML timeline shows attended meetings (blue cards) and completed tasks (green cards). No guessing what the final schedule looks like.
 
-**🗓️ Visual Schedule Timeline.** After an episode completes, a scrollable HTML timeline shows exactly when the agent attended meetings (blue cards) and completed tasks (green cards). No more guessing what the final schedule looks like.
+**📥 Calendar Export.** Download the agent's schedule as a `.ics` file. Import it into Google Calendar or Apple Calendar. The agent's plan, on your actual device.
 
-**📥 Calendar Export (.ics).** Download the agent's finalized schedule as a standard `.ics` file. Import it into Google Calendar or Apple Calendar to see the planned week on your own device.
+---
+
+## Human-centered impact: who LifeOS is for
+
+### For developers
+A stress test for agent behavior over many interdependent steps — not just single-turn demos.
+
+### For researchers
+Independent reward channels and detailed trajectories make it easier to study alignment, robustness, and long-horizon policy quality.
+
+### For hackathon participants
+The domain is instantly relatable. Judges can understand failure and success intuitively without needing specialized theory.
+
+And that accessibility matters.
+If personal AI is going to be trustworthy, its behavior should be inspectable by more than just experts.
 
 ---
 
 ## What we learned building this
 
-**Reward design is harder than environment design.** We spent more time iterating on reward functions than building the simulation itself. The difference between a reward that teaches good behavior and one that gets hacked is surprisingly subtle.
+1. **Personal planning is inherently multi-objective.**
+   Single-metric success leads to brittle behavior. The moment we split rewards into four independent signals, agent quality jumped — and debugging became 10x faster.
 
-**Chaos makes everything harder — and more interesting.** Without random events, the agent converges to a boring optimal policy within 10 episodes. With 35% chaos probability, every episode is genuinely different, and the agent must generalize rather than memorize.
+2. **Interpretability is a feature, not a luxury.**
+   Structured actions and decomposed rewards made iteration dramatically faster. The inner monologue wasn't originally planned — we added it for debugging and it became the most compelling part of the demo.
 
-**Small models can learn complex behavior.** Mistral-7B with a 4-bit LoRA adapter — running on a free Colab T4 — learned to triage competing life demands. You don't need GPT-4-scale compute to demonstrate meaningful RL capabilities.
+3. **Chaos is useful signal.**
+   Without random events, the agent converges to a boring optimal policy within 10 episodes. With 35% chaos probability, every episode is genuinely different, and the agent must generalize rather than memorize.
 
-**Transparency is a feature.** The inner monologue wasn't originally planned. We added it because we couldn't tell *why* the agent was making certain decisions. Once we could read its thoughts, debugging became 10x faster — and the demo became 10x more compelling.
-
----
-
-## What's next
-
-LifeOS is a starting point. The environment is designed to grow:
-
-- **Multi-persona support**: Different constraint profiles — a working parent, a startup founder, a freelancer — each with different trade-offs and chaos events.
-- **LLM-as-judge**: Using a separate model to evaluate the *quality* of reply messages and delegation reasons, adding a fifth reward signal that captures empathy and communication skill.
-- **Real calendar integration**: Connecting to Google Calendar APIs to generate personalized chaos scenarios from your actual schedule.
-- **Extended training**: Scaling from 30 to 500+ episodes with curriculum learning — starting with low chaos and gradually increasing difficulty.
-
-The ultimate vision: an RL-trained personal AI that doesn't just *schedule* your life, but understands the weight of every trade-off and *navigates* the chaos with you.
+4. **Human realism improves evaluation quality.**
+   When scenarios feel real — missed deadlines, angry friends, surprise expenses — stakeholders can reason about agent behavior more clearly than with abstract benchmarks.
 
 ---
 
-## Links
+## What's next for LifeOS
 
-- 🤗 [**Live Demo** — Try it on Hugging Face Spaces](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen)
-- 📦 [**Trained Model** — LoRA weights on Hugging Face Hub](https://huggingface.co/SParsh003/LifeOS-Trained-Agent)
-- 💻 [**Source Code** — GitHub repository](https://github.com/itzzSPcoder/LifeOS)
-- 📓 [**Training Notebook** — Colab-ready, run end-to-end](https://github.com/itzzSPcoder/LifeOS/blob/main/lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb)
+We're exploring:
+- **Broader persona packs**: students, founders, parents, professionals — each with different constraint trade-offs and chaos profiles.
+- **Longer-horizon episodes**: weeks or months with compounding consequences, not just 30 steps.
+- **LLM-as-judge**: using a separate model to evaluate reply *quality* and delegation *reasoning*, adding a fifth reward signal that captures empathy.
+- **Real calendar integration**: connecting to Google Calendar APIs for personalized scenario generation from actual user schedules.
+
+Our long-term goal is not a model that "does tasks."
+It is a model that can protect human well-being while still making progress under pressure.
+
+---
+
+## Closing
+
+LifeOS began with a simple observation: intelligence in isolation is not enough.
+The real challenge is decision quality when constraints collide.
+
+We built an environment where the right answer changes every step, where success means *balance* rather than *maximization*, and where an agent's judgment can be inspected, measured, and improved.
+
+If you're building assistants, agent workflows, or RL environments for real-world planning — we'd love to hear from you.
+Because the future of personal AI will be shaped not just by capability, but by judgment.
+
+[👉 Try the live demo](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) · [📦 Trained model](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) · [💻 Source code](https://github.com/itzzSPcoder/LifeOS)
 
 *Built for the Meta OpenEnv Hackathon 2025.*
