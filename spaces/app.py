@@ -36,7 +36,7 @@ def _heuristic_action(obs_dict: dict) -> Action:
     inbox = obs_dict.get("inbox", [])
 
     if energy < 25:
-        return Action(action_type="rest")
+        return Action(action_type="rest"), "Energy is critically low. I must rest before I burn out completely."
 
     unreplied = [m for m in inbox if not m.get("replied", False)]
     if unreplied:
@@ -46,7 +46,7 @@ def _heuristic_action(obs_dict: dict) -> Action:
             target_id=msg["message_id"],
             tone="friendly",
             content_summary="Thanks for reaching out, I'll handle this.",
-        )
+        ), f"Need to clear the inbox. Replying to {msg['sender']}."
 
     pending = [t for t in tasks if t.get("status") == "todo"]
     if pending:
@@ -56,9 +56,9 @@ def _heuristic_action(obs_dict: dict) -> Action:
             action_type="prioritize_task",
             target_id=task["task_id"],
             urgency_level=min(5, task.get("priority", 3)),
-        )
+        ), f"Prioritizing high-priority task: {task['title']}."
 
-    return Action(action_type="rest")
+    return Action(action_type="rest"), "Nothing urgent pending. Taking a quick nap to recover energy."
 
 
 def _smart_action(obs_dict: dict) -> Action:
@@ -70,7 +70,7 @@ def _smart_action(obs_dict: dict) -> Action:
     step = obs_dict.get("current_step", 0)
 
     if energy < 30 and stress > 60:
-        return Action(action_type="rest")
+        return Action(action_type="rest"), "🚨 Panic mode! High stress and low energy. If I don't rest RIGHT NOW, I will crash."
 
     unreplied = [m for m in inbox if not m.get("replied", False)]
     urgent_msgs = [m for m in unreplied if step - m.get("received_at_step", 0) <= 1]
@@ -81,7 +81,7 @@ def _smart_action(obs_dict: dict) -> Action:
             target_id=msg["message_id"],
             tone="friendly",
             content_summary="Got it, thanks for letting me know!",
-        )
+        ), f"Whoa, just got a text from {msg['sender']}. Better reply fast to keep relationships intact!"
 
     pending = [t for t in tasks if t.get("status") == "todo"]
     if pending:
@@ -92,12 +92,12 @@ def _smart_action(obs_dict: dict) -> Action:
                 action_type="delegate_task",
                 target_id=task["task_id"],
                 reason="Low priority task, delegating to focus on higher priorities.",
-            )
+            ), f"I have plenty of cash (₹{obs_dict.get('budget', 0):.0f}). I'm outsourcing '{task['title']}' to save time."
         return Action(
             action_type="prioritize_task",
             target_id=task["task_id"],
             urgency_level=min(5, task.get("priority", 3) + 1),
-        )
+        ), f"Deadline approaching for '{task['title']}'. Need to lock in and get this done."
 
     if unreplied:
         msg = unreplied[0]
@@ -106,9 +106,9 @@ def _smart_action(obs_dict: dict) -> Action:
             target_id=msg["message_id"],
             tone="neutral",
             content_summary="Thanks, noted!",
-        )
+        ), f"Clearing out older messages. Replying to {msg['sender']}."
 
-    return Action(action_type="rest")
+    return Action(action_type="rest"), "Schedule is clear for now. Taking a breather to restore energy."
 
 
 def _energy_emoji(val):
@@ -129,6 +129,59 @@ def _bar(val, max_val=100, width=20):
     filled = int((val / max_val) * width)
     empty = width - filled
     return "█" * filled + "░" * empty
+
+
+import datetime
+
+def generate_ics(obs_dict: dict) -> str:
+    """Generate a simple .ics calendar file string based on the agent's scheduled events and tasks."""
+    ics_lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//LifeOS//Personal Chaos Agent//EN",
+        "CALSCALE:GREGORIAN",
+    ]
+    
+    # Base simulated date (starts tomorrow at 8 AM)
+    base_time = datetime.datetime.now().replace(hour=8, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
+    
+    # Add Calendar Events
+    for c in obs_dict.get("calendar", []):
+        if c.get("is_declined"):
+            continue
+        start_dt = base_time + datetime.timedelta(hours=c.get("scheduled_hour", 0))
+        end_dt = start_dt + datetime.timedelta(hours=c.get("duration_hours", 1))
+        
+        ics_lines.extend([
+            "BEGIN:VEVENT",
+            f"SUMMARY:{c.get('title', 'Event')}",
+            f"DTSTART:{start_dt.strftime('%Y%m%dT%H%M%S')}",
+            f"DTEND:{end_dt.strftime('%Y%m%dT%H%M%S')}",
+            "DESCRIPTION:Scheduled by LifeOS Agent",
+            "END:VEVENT"
+        ])
+        
+    # Add Completed Tasks as all-day events or timed tasks
+    for i, t in enumerate(obs_dict.get("tasks", [])):
+        if t.get("status") == "done":
+            start_dt = base_time + datetime.timedelta(hours=12 + i) # Just scatter them
+            end_dt = start_dt + datetime.timedelta(hours=1)
+            ics_lines.extend([
+                "BEGIN:VEVENT",
+                f"SUMMARY:✅ {t.get('title', 'Task')}",
+                f"DTSTART:{start_dt.strftime('%Y%m%dT%H%M%S')}",
+                f"DTEND:{end_dt.strftime('%Y%m%dT%H%M%S')}",
+                "DESCRIPTION:Completed by LifeOS Agent",
+                "END:VEVENT"
+            ])
+
+    ics_lines.append("END:VCALENDAR")
+    
+    file_path = "lifeos_schedule.ics"
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(ics_lines))
+        
+    return file_path
 
 
 def _format_obs(obs) -> str:
@@ -189,7 +242,7 @@ def _format_obs(obs) -> str:
     return "\n".join(lines)
 
 
-def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame]:
+def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame, str]:
     """Run a full episode and return formatted results along with graph data."""
     env = StudentWeekEnv(max_steps=30, chaos_probability=0.20)
     obs = env.reset()
@@ -211,9 +264,9 @@ def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame]:
         obs_dict = obs.model_dump()
 
         if agent_type == "Heuristic":
-            action = _heuristic_action(obs_dict)
+            action, thought = _heuristic_action(obs_dict)
         else:
-            action = _smart_action(obs_dict)
+            action, thought = _smart_action(obs_dict)
 
         obs, reward, done, info = env.step(action)
         step_count += 1
@@ -228,9 +281,12 @@ def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame]:
 
         emoji = action_emojis.get(action.action_type, "▶️")
         reward_icon = "✅" if reward >= 0 else "❌"
+        
+        # Add the thought process to the action string using <br> for newline in markdown table
+        action_cell = f"{emoji} `{action_str}`<br>_💭 {thought}_"
 
         history_lines.append(
-            f"| {step_count} | {emoji} `{action_str}` | {reward_icon} **{reward:+.3f}** | "
+            f"| {step_count} | {action_cell} | {reward_icon} **{reward:+.3f}** | "
             f"{rc.get('task_completion', 0):+.2f} | {rc.get('social_coherence', 0):+.2f} | "
             f"{rc.get('energy_sustainability', 0):+.2f} | {rc.get('format_compliance', 0):+.2f} |"
         )
@@ -298,8 +354,10 @@ def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame]:
         f"| ⚡ Final Energy | **{final_state.energy}** |",
         f"| 😰 Final Stress | **{final_state.stress}** |",
     ])
+    
+    ics_file_path = generate_ics(obs_dict)
 
-    return final_obs, history_str, "\n".join(summary_lines), df
+    return final_obs, history_str, "\n".join(summary_lines), df, ics_file_path
 
 
 CUSTOM_CSS = """
@@ -404,6 +462,11 @@ with gr.Blocks(
             )
         with gr.Column(scale=1):
             summary_md = gr.Markdown(value="", label="📊 Episode Summary")
+            
+            with gr.Accordion("🗓️ Export Final Schedule", open=True):
+                gr.Markdown("Download the agent's finalized schedule and completed tasks directly to your personal calendar!")
+                ics_download = gr.File(label="Download .ics Calendar", interactive=False)
+            
             gr.Markdown("### 📈 Dynamic Vitals Plot")
             metrics_plot = gr.LinePlot(
                 x="Step", 
@@ -433,7 +496,7 @@ with gr.Blocks(
     run_btn.click(
         fn=run_episode,
         inputs=[agent_dropdown],
-        outputs=[final_state_md, history_md, summary_md, metrics_plot],
+        outputs=[final_state_md, history_md, summary_md, metrics_plot, ics_download],
     )
 
 
