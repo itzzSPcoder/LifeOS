@@ -16,7 +16,7 @@ The project follows the **OpenEnv standard**, which strictly separates the envir
 *   **Client (`lifeos/envs/client.py`)**: A lightweight Python HTTP client used to interact with the server.
 *   **Reward Modules (`lifeos/rewards/`)**: Independent scripts that calculate scores based on the agent's actions.
 *   **Training Script (`lifeos/training/train_grpo.py`)**: The script that actually trains the LLM using the environment's feedback.
-*   **User Interface (`web_app.py` / `spaces/app.py`)**: A Gradio web dashboard for humans to watch the agent play out a scenario.
+*   **User Interface (`spaces/app.py`)**: A Gradio web dashboard for humans to watch the agent play out a scenario, featuring inner monologue, dynamic vitals charts, and calendar export.
 
 ---
 
@@ -86,7 +86,7 @@ This is where the actual Machine Learning happens. We use **GRPO (Group Relative
 The project is packaged for the **Meta OpenEnv Hackathon** and deployed on Hugging Face Spaces.
 *   `Dockerfile.openenv`: Tells Hugging Face how to install dependencies and run the server.
 *   `openenv.yaml`: The official manifest file declaring the environment's capabilities to the OpenEnv framework.
-*   `web_app.py`: A Gradio interface that connects to the environment, allowing judges to click "Run Episode" and visually see the LLM's decisions step-by-step.
+*   `spaces/app.py`: A Gradio interface that connects to the environment, allowing judges to click "Run Episode" and visually see the LLM's decisions step-by-step, with inner monologue thoughts and downloadable calendar exports.
 
 ---
 

@@ -17,18 +17,33 @@ tags:
 license: mit
 ---
 
-# LifeOS — Teaching LLMs to Handle Real-Life Chaos
+<div align="center">
 
-> An OpenEnv-compliant RL environment for training LLMs to manage cascading personal life conflicts.
-> **Theme:** Personalized Tasks (#3.2) | **Stack:** Python · FastAPI · TRL · Unsloth · Gradio · OpenEnv
+# 🧠 LifeOS — The Personal Chaos Agent
 
-## The Problem
+**An OpenEnv-compliant RL environment that trains LLMs to survive cascading personal life chaos.**
 
-LLMs excel at structured reasoning tasks — coding, math, Q&A — but fail spectacularly when confronted with the messy, cascading conflicts of real personal life. Consider a student who must simultaneously handle a moved-up assignment deadline, an angry friend's message, a surprise expense, and declining energy — all while deciding *which thing to sacrifice*. No existing RL environment models this uniquely human challenge where every decision has downstream social, temporal, and energy consequences.
+[![Live Demo](https://img.shields.io/badge/🤗%20Live%20Demo-Hugging%20Face-blue?style=for-the-badge)](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen)
+[![Trained Model](https://img.shields.io/badge/📦%20Model-Mistral%207B%20LoRA-purple?style=for-the-badge)](https://huggingface.co/SParsh003/LifeOS-Trained-Agent)
+[![GitHub](https://img.shields.io/badge/💻%20Code-GitHub-black?style=for-the-badge)](https://github.com/itzzSPcoder/LifeOS)
 
-## The Environment
+**Theme:** Personalized Tasks (#3.2) · **Stack:** Python · TRL · Unsloth · Gradio · OpenEnv
 
-LifeOS simulates a chaotic student week as an RL training environment. The agent receives a rich observation and must choose structured actions each step.
+</div>
+
+---
+
+## 🎯 The Problem
+
+LLMs excel at structured reasoning — coding, math, Q&A — but fail when confronted with **real personal life chaos**. A student must simultaneously handle a moved-up deadline, an angry friend's message, a surprise expense, and declining energy, all while deciding *which thing to sacrifice*. No existing RL environment models this uniquely human challenge where every decision has downstream social, temporal, and energy consequences.
+
+## 💡 The Solution
+
+LifeOS simulates a **chaotic student week** as a 30-step RL episode. An LLM agent receives rich observations (tasks, messages, calendar, energy, stress, budget) and must choose structured actions each step. Four independent reward functions train the agent to balance competing priorities without reward hacking.
+
+---
+
+## 🏗️ Architecture
 
 ```
                     ┌─────────────────────────────────────────┐
@@ -58,9 +73,12 @@ LifeOS simulates a chaotic student week as an RL training environment. The agent
                     └──────────────────────────────────────────┘
 ```
 
-**Episode structure:** 30 time steps per episode. Ends early on burnout (energy = 0). Chaos events inject randomly throughout — the agent cannot see the chaos queue.
+---
 
-**Action space (6 structured actions):**
+## 🎮 Action Space
+
+The agent must choose one of **6 structured actions** per step:
+
 | Action | Parameters | Effect |
 |---|---|---|
 | `reply_message` | target_id, tone, content_summary | Responds to inbox messages |
@@ -70,7 +88,9 @@ LifeOS simulates a chaotic student week as an RL training environment. The agent
 | `decline_event` | target_id, reason | Declines event (hurts relationship) |
 | `rest` | — | Recovers energy, passes 1 step |
 
-## Reward Design
+---
+
+## 🏆 Reward Design
 
 Four **independent** reward functions prevent reward hacking:
 
@@ -81,126 +101,121 @@ Four **independent** reward functions prevent reward hacking:
 | **Energy Sustainability** | Energy above 40, proactive rest, burnout | -1.5 to +0.4 per step |
 | **Format Compliance** | Valid action schema, anti-hack detection | -1.0 to +0.1 per step |
 
-**Anti-hacking safeguards:**
-- ⏱️ 30-second step timeout → -2.0 penalty
-- 🔁 Action loop detection (3+ repeats) → -0.5 penalty
-- 🔒 Protected state access attempt → -1.0 penalty
+### Anti-Hack Safeguards
+- ⏱️ 30-second step timeout → **-2.0** penalty
+- 🔁 Action loop detection (3+ repeats) → **-0.5** penalty
+- 🔒 Protected state access attempt → **-1.0** penalty
 - 🚫 Chaos queue locked — agent cannot read or modify it
-- 📊 All reward components logged separately per episode for monitoring
 
-## Results
+---
 
-![Reward curves showing composite and per-function reward improvement over 50 training episodes](lifeos/outputs/reward_curves.png)
+## 🧪 Training
 
-> Composite reward improved from **-2.8** (heuristic baseline) to **+1.4** (trained agent) over 50 episodes.
+| Component | Details |
+|---|---|
+| **Algorithm** | GRPO (Group Relative Policy Optimization) via TRL |
+| **Base Model** | Mistral-7B-Instruct-v0.3 |
+| **Optimization** | 4-bit LoRA (r=16) via Unsloth |
+| **Episodes** | 50 training episodes |
+| **Output** | LoRA adapter (not merged — preserves quality) |
 
-### Before/After: Same Chaos Scenario
+**Training loop:** `env.reset()` → LLM generates action → `env.step(action)` → composite reward from all 4 independent functions → GRPO weight update.
 
-| | Heuristic Agent | Trained Agent |
-|---|---|---|
-| **Step 1** (deadline in 8 steps) | `rest()` — wasted a step | `prioritize_task(t2, urgency=5)` — tackles closest deadline |
-| **Step 4** (angry message) | Ignores message | `reply_message(msg4, tone=apologetic)` — replies within 1 step |
-| **Step 8** (energy=25) | `prioritize_task` — ignores energy | `rest()` — proactive recovery before burnout |
-| **Final** | 3 tasks done, 4 missed, burnout | 6 tasks done, 1 missed, energy=38 |
+📓 **Self-contained Colab notebook:** [`lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb`](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb) — clone and run end-to-end.
 
-## Training
+---
 
-**Algorithm:** GRPO (Group Relative Policy Optimization) via HuggingFace TRL — no value model needed, ideal for verifiable reward environments.
+## ✨ Interactive Features
 
-**Model:** `mistralai/Mistral-7B-Instruct-v0.3` with 4-bit LoRA via Unsloth for memory-efficient training.
+The Gradio dashboard includes several features designed for interactive analysis:
 
-**Training loop:** Each rollout calls `env.reset()` → LLM generates action → `env.step(action)` → composite reward from all 4 independent functions → GRPO updates. Trained for 50 episodes.
+- **🧠 Agent Inner Monologue:** The agent explains its reasoning at every step (e.g., *"Stress is at 80%, if I don't rest NOW I'll crash!"*).
+- **📈 Dynamic Vitals Plot:** Real-time Energy & Stress line graph tracking the agent's trajectory across all 30 steps.
+- **🗓️ Calendar Export (.ics):** Download the agent's finalized schedule as a standard `.ics` file — open it in Google Calendar or Apple Calendar to see the planned week.
+- **📊 Reward Breakdown Table:** Per-step reward decomposition across all 4 independent signals.
 
-**Output:** LoRA adapter saved to `outputs/lifeos-grpo-adapter/` (NOT merged 4-bit — preserves quality).
+---
 
-📓 **[Colab Notebook](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb)** — self-contained, runnable end-to-end by a judge who clones the repo.
+## 📁 Project Structure
 
-## Why It Matters
+```
+LifeOS/
+├── lifeos/
+│   ├── envs/                              # OpenEnv-compliant environment
+│   │   ├── student_week_openenv.py        # Core environment (reset/step/state)
+│   │   ├── server.py                      # FastAPI server (port 8200)
+│   │   └── client.py                      # HTTP client
+│   ├── rewards/                           # 4 independent reward functions
+│   │   ├── task_completion_reward.py
+│   │   ├── social_coherence_reward.py
+│   │   ├── energy_sustainability_reward.py
+│   │   └── format_compliance_reward.py
+│   ├── training/
+│   │   └── train_grpo.py                  # GRPO training script
+│   └── notebooks/
+│       └── lifeos_trl_unsloth_colab.ipynb # Colab-ready training notebook
+├── spaces/
+│   └── app.py                             # Gradio dashboard (UI)
+├── docs/
+│   ├── LifeOS_Project_Explanation.md      # Detailed technical writeup
+│   └── hf_blog.md                         # Mini-blog
+├── openenv.yaml                           # OpenEnv manifest
+├── Dockerfile.openenv                     # HF Spaces deployment
+├── requirements.txt                       # Core dependencies
+├── requirements_spaces.txt                # Gradio Space dependencies
+└── requirements-colab.txt                 # Colab training dependencies
+```
 
-Personal task management under cascading constraints is a **capability gap** in current LLMs. LifeOS provides the first structured RL environment targeting this — useful for:
-- **Personal AI assistants** that need to triage competing demands
-- **RL research** on multi-signal reward shaping with social consequences
-- **Evaluation benchmarks** for LLM planning under real-world uncertainty
+---
 
-## OpenEnv Compliance
+## 🚀 Quick Start
 
-LifeOS is fully compliant with the [OpenEnv](https://github.com/meta-pytorch/OpenEnv) standard:
-- ✅ `openenv.yaml` manifest with action/observation/reward schema
-- ✅ Gym-style API: `reset()`, `step(action)`, `state` property
-- ✅ FastAPI server (`lifeos/envs/server.py`) — runs on port 8200
-- ✅ Typed HTTP client (`lifeos/envs/client.py`) — no server imports
-- ✅ Dockerfile for HuggingFace Spaces deployment
-
-## Quick Start
-
-### Setup
+### Run the Gradio Demo Locally
 ```bash
-git clone https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen
-cd LifeOS-Personal-Chaos-Agen
-python -m venv .venv
-.venv\Scripts\activate  # Windows (or source .venv/bin/activate on Linux/Mac)
-pip install -r requirements.txt
+git clone https://github.com/itzzSPcoder/LifeOS.git
+cd LifeOS
+pip install -r requirements_spaces.txt
+python spaces/app.py
 ```
 
 ### Run the OpenEnv Server
 ```bash
+pip install -r requirements.txt
 uvicorn lifeos.envs.server:app --host 0.0.0.0 --port 8200
 ```
 
-### Run GRPO Training (local simulation)
-```bash
-python -m lifeos.training.train_grpo --episodes 50
-```
-
-### Run the Gradio Demo locally
-```bash
-python web_app.py
-```
-
-### Run the CLI (terminal-first interface)
-```bash
-python -m lifeos.cli --setup
-python -m lifeos.cli --scenario student_week --agent heuristic
-python -m lifeos.cli --tui
-```
-
-## Project Structure
-
-```
-lifeos/
-├── envs/                           # OpenEnv-compliant environment
-│   ├── student_week_openenv.py     # Environment class (reset/step/state)
-│   ├── server.py                   # FastAPI server (port 8200)
-│   └── client.py                   # HTTP client (no server imports)
-├── rewards/                        # 4 independent reward functions
-│   ├── task_completion_reward.py
-│   ├── social_coherence_reward.py
-│   ├── energy_sustainability_reward.py
-│   └── format_compliance_reward.py
-├── training/
-│   └── train_grpo.py               # GRPO training (local + GPU paths)
-├── notebooks/
-│   └── lifeos_trl_unsloth_colab.ipynb  # Colab-ready training notebook
-├── cli/                            # Terminal-first interface
-├── api/                            # Existing REST API
-├── scenarios/                      # 12 JSON scenario files
-└── agents/                         # Heuristic & PPO agents
-web_app.py                          # Gradio demo (HF Spaces entry point)
-openenv.yaml                        # OpenEnv manifest
-Dockerfile.openenv                  # HF Spaces deployment
-docs/hf_blog.md                     # Mini-blog writeup
-```
-
-## Links
-
-- 🤗 **HuggingFace Space:** [LifeOS — Personal Chaos Agent](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen)
-- 💻 **GitHub:** [itzzSPcoder/LifeOS](https://github.com/itzzSPcoder/LifeOS)
-- 📓 **Training Notebook:** [lifeos_trl_unsloth_colab.ipynb](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb)
-- 📝 **Mini-blog:** [docs/hf_blog.md](docs/hf_blog.md)
-- 🎥 **Demo:** [Try the interactive demo on HuggingFace Spaces](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen)
+### Train with GRPO (Colab Recommended)
+Open [`lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb`](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb) in Google Colab with a T4 GPU and run all cells.
 
 ---
 
-**Theme:** Personalized Tasks (#3.2)  
-**Stack:** Python, FastAPI, TRL, Unsloth, Gradio, OpenEnv  
-**License:** MIT
+## ✅ OpenEnv Compliance
+
+- ✅ `openenv.yaml` manifest with full action/observation/reward schema
+- ✅ Gym-style API: `reset()`, `step(action)`, `state` property
+- ✅ FastAPI server (`lifeos/envs/server.py`) — port 8200
+- ✅ Typed HTTP client (`lifeos/envs/client.py`) — zero server imports
+- ✅ Dockerfile for Hugging Face Spaces deployment
+- ✅ 4 independent reward signals with anti-hack protections
+
+---
+
+## 🔗 Links
+
+| Resource | Link |
+|---|---|
+| 🤗 **Live Demo** | [HuggingFace Space](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) |
+| 📦 **Trained Model** | [SParsh003/LifeOS-Trained-Agent](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) |
+| 💻 **Source Code** | [GitHub: itzzSPcoder/LifeOS](https://github.com/itzzSPcoder/LifeOS) |
+| 📓 **Training Notebook** | [Colab Notebook](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb) |
+| 📝 **Blog Writeup** | [docs/hf_blog.md](docs/hf_blog.md) |
+
+---
+
+<div align="center">
+
+**Built for the Meta OpenEnv Hackathon 2025**
+
+*Teaching AI to handle the beautiful chaos of being human.*
+
+</div>
