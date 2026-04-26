@@ -145,24 +145,13 @@ This shifted optimization pressure toward actual competence rather than loophole
 
 LifeOS was built as a complete, modular pipeline. By separating the environment core, the reward logic, and the training loop across a decoupled FastAPI architecture, we ensured the system can be scaled, inspected, and deployed seamlessly.
 
-```mermaid
-graph TD
-    A[Environment Core] -->|State & Action| B[FastAPI Server]
-    B --> C[HTTP Client]
-    A -->|Observation Data| D[4 Reward Modules]
-    C -->|Observations| E[GRPO Training Loop]
-    E -->|Actions| C
-    A -->|Episode Logs| F[Gradio Dashboard]
-    F -->|ICS Export| G[Calendar Timeline]
-    
-    style A fill:#1e293b,stroke:#0284c7,color:#f8fafc
-    style B fill:#1e293b,stroke:#0284c7,color:#f8fafc
-    style C fill:#1e293b,stroke:#16a34a,color:#f8fafc
-    style D fill:#1e293b,stroke:#f59e0b,color:#f8fafc
-    style E fill:#1e293b,stroke:#8b5cf6,color:#f8fafc
-    style F fill:#1e293b,stroke:#e11d48,color:#f8fafc
-    style G fill:#1e293b,stroke:#e11d48,color:#f8fafc
-```
+| Component | Role in Pipeline |
+| :--- | :--- |
+| **🌍 Environment Core** | Maintains state, validates actions, injects chaos events |
+| **⚖️ Reward Modules** | 4 independent signals (Task, Social, Energy, Format) |
+| **🔌 FastAPI Server** | Decouples the environment for remote API access |
+| **🧠 GRPO Training** | HuggingFace TRL loop that queries the API and updates LoRA |
+| **🖥️ Gradio UI** | Interactive dashboard for episode playback and ICS export |
 
 ---
 
@@ -289,4 +278,4 @@ Because the future of personal AI will be shaped not just by capability, but by 
 
 [👉 Try the live demo](https://huggingface.co/spaces/SParsh003/LifeOS-Personal-Chaos-Agen) · [📦 Trained model](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) · [💻 Source code](https://github.com/itzzSPcoder/LifeOS)
 
-*Built for the Meta OpenEnv Hackathon 2025.*
+*Built for the Meta OpenEnv Hackathon 2026.*
