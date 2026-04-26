@@ -382,7 +382,8 @@ with gr.Blocks(
         "# 🧠 LifeOS: The Personal Chaos Agent\n"
         "An OpenEnv-compliant RL environment where an LLM must survive cascading personal life chaos.\n\n"
         "> **How it works:** Select an agent, hit Run, and watch it navigate tasks, messages, budget & stress in real-time!\n\n"
-        "`OpenEnv Compliant` `4 Reward Signals` `Anti-Hack Protected` `GRPO Trained`"
+        "`OpenEnv Compliant` `4 Reward Signals` `Anti-Hack Protected` `GRPO Trained`\n\n"
+        "<a href='https://huggingface.co/SParsh003/LifeOS-Trained-Agent' target='_blank' style='display:inline-block; margin-top:10px; padding:8px 16px; background:linear-gradient(135deg, #4338ca, #7c3aed); color:white; font-weight:600; border-radius:8px; text-decoration:none; box-shadow:0 4px 6px rgba(0,0,0,0.1)'>📦 View Trained Model Weights (Mistral 7B)</a>"
     )
 
     with gr.Row():
@@ -423,7 +424,7 @@ with gr.Blocks(
         "|---|---|\n"
         "| **Environment** | StudentWeekEnv (OpenEnv-compliant FastAPI) |\n"
         "| **Algorithm** | GRPO (Group Relative Policy Optimization) |\n"
-        "| **Model** | Mistral-7B-Instruct-v0.3 (4-bit LoRA via Unsloth) |\n"
+        "| **Model Weights** | [SParsh003/LifeOS-Trained-Agent](https://huggingface.co/SParsh003/LifeOS-Trained-Agent) (Mistral-7B LoRA) 👈 **Click to view model!** |\n"
         "| **Reward Signals** | Task Completion, Social Coherence, Energy Sustainability, Format Compliance |\n"
         "| **Anti-Hack** | Step timeout, loop detection, protected state check |\n\n"
         "*Built for the Meta OpenEnv Hackathon 2025*"
