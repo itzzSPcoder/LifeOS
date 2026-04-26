@@ -141,21 +141,28 @@ So we added safeguards from the start:
 
 This shifted optimization pressure toward actual competence rather than loopholes.
 
-### Open architecture for real use
+### An end-to-end open architecture
 
-LifeOS is not only a training script. It is a full workflow:
+LifeOS was built as a complete, modular pipeline. By separating the environment core, the reward logic, and the training loop across a decoupled FastAPI architecture, we ensured the system can be scaled, inspected, and deployed seamlessly.
 
+```mermaid
+graph TD
+    A[Environment Core] -->|State & Action| B[FastAPI Server]
+    B --> C[HTTP Client]
+    A -->|Observation Data| D[4 Reward Modules]
+    C -->|Observations| E[GRPO Training Loop]
+    E -->|Actions| C
+    A -->|Episode Logs| F[Gradio Dashboard]
+    F -->|ICS Export| G[Calendar Timeline]
+    
+    style A fill:#1e293b,stroke:#0284c7,color:#f8fafc
+    style B fill:#1e293b,stroke:#0284c7,color:#f8fafc
+    style C fill:#1e293b,stroke:#16a34a,color:#f8fafc
+    style D fill:#1e293b,stroke:#f59e0b,color:#f8fafc
+    style E fill:#1e293b,stroke:#8b5cf6,color:#f8fafc
+    style F fill:#1e293b,stroke:#e11d48,color:#f8fafc
+    style G fill:#1e293b,stroke:#e11d48,color:#f8fafc
 ```
-Environment Core ──→ FastAPI Server ──→ HTTP Client
-       │                                      │
-       ▼                                      ▼
-  4 Reward Modules              GRPO Training Loop
-       │                                      │
-       ▼                                      ▼
-  Episode Logs ──────→ Gradio Dashboard ──→ Calendar Export
-```
-
-That makes it usable for research experiments *and* hackathon demos *and* actual personal planning exploration.
 
 ---
 
