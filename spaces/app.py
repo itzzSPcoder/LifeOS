@@ -244,7 +244,7 @@ def _format_obs(obs) -> str:
 
 def run_episode(agent_type: str) -> tuple[str, str, str, pd.DataFrame, str]:
     """Run a full episode and return formatted results along with graph data."""
-    env = StudentWeekEnv(max_steps=30, chaos_probability=0.20)
+    env = StudentWeekEnv(max_steps=30, chaos_probability=0.35)
     obs = env.reset()
 
     history_lines = []

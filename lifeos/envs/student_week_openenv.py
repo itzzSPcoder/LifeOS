@@ -142,16 +142,38 @@ _DEFAULT_TASKS: list[dict] = [
 ]
 
 _CHAOS_POOL: list[dict] = [
+    # Academic / Work
     {"event_type": "deadline_moved_up", "description": "Assignment deadline moved up by 2 days!", "impact": {"stress": 15}},
-    {"event_type": "friend_reschedule", "description": "Friend asks to reschedule dinner to tonight.", "impact": {"stress": 5}},
-    {"event_type": "unexpected_expense", "description": "Laptop charger broke — ₹800 replacement.", "impact": {"budget": -800, "stress": 10}},
-    {"event_type": "wifi_outage", "description": "Campus Wi-Fi down for 2 hours.", "impact": {"stress": 12, "energy": -5}},
     {"event_type": "surprise_quiz", "description": "Surprise quiz announced for tomorrow!", "impact": {"stress": 18}},
-    {"event_type": "good_news", "description": "Got selected for hackathon finals!", "impact": {"stress": -10, "energy": 8}},
-    {"event_type": "mentor_call", "description": "Mentor calls with encouragement and career advice.", "impact": {"stress": -12, "energy": 5}},
-    {"event_type": "roommate_conflict", "description": "Roommate is upset about noise during late study.", "impact": {"stress": 8, "relationship": -0.05}},
-    {"event_type": "health_issue", "description": "Mild fever — need extra rest.", "impact": {"energy": -20, "stress": 10}},
+    {"event_type": "group_project_flake", "description": "Group member flaked on their part of the project.", "impact": {"stress": 12, "energy": -8}},
+    {"event_type": "professor_meeting", "description": "Professor requested an urgent meeting.", "impact": {"stress": 10}},
+    
+    # Financial
+    {"event_type": "unexpected_expense", "description": "Laptop charger broke — ₹800 replacement.", "impact": {"budget": -800, "stress": 10}},
     {"event_type": "freelance_payment", "description": "Old freelance payment of ₹1500 arrived!", "impact": {"budget": 1500, "stress": -5}},
+    {"event_type": "subscription_auto_renew", "description": "Forgot to cancel free trial! Auto-charged ₹999.", "impact": {"budget": -999, "stress": 8}},
+    {"event_type": "found_cash", "description": "Found ₹500 in an old pair of jeans!", "impact": {"budget": 500, "energy": 5}},
+    {"event_type": "fine_paid", "description": "Paid a late fee for library books (₹250).", "impact": {"budget": -250, "stress": 5}},
+    
+    # Tech / Infrastructure
+    {"event_type": "wifi_outage", "description": "Campus Wi-Fi down for 2 hours.", "impact": {"stress": 12, "energy": -5}},
+    {"event_type": "laptop_update", "description": "Windows forced an update during peak work hours.", "impact": {"stress": 15, "energy": -5}},
+    {"event_type": "data_loss", "description": "Word doc crashed, lost 1 hour of work.", "impact": {"stress": 20, "energy": -10}},
+    {"event_type": "power_cut", "description": "Unexpected power cut in the hostel.", "impact": {"stress": 8, "energy": -2}},
+    
+    # Social / Relationships
+    {"event_type": "friend_reschedule", "description": "Friend asks to reschedule dinner to tonight.", "impact": {"stress": 5}},
+    {"event_type": "roommate_conflict", "description": "Roommate is upset about noise during late study.", "impact": {"stress": 8, "relationship": -0.05}},
+    {"event_type": "family_surprise", "description": "Mom sent a surprise care package!", "impact": {"stress": -15, "energy": 10, "relationship": 0.05}},
+    {"event_type": "drama", "description": "Got pulled into pointless friend-group drama.", "impact": {"stress": 15, "energy": -10, "relationship": -0.02}},
+    {"event_type": "mentor_call", "description": "Mentor calls with encouragement and career advice.", "impact": {"stress": -12, "energy": 5}},
+    
+    # Health / Personal
+    {"event_type": "health_issue", "description": "Mild fever — need extra rest.", "impact": {"energy": -20, "stress": 10}},
+    {"event_type": "good_news", "description": "Got selected for hackathon finals!", "impact": {"stress": -10, "energy": 8}},
+    {"event_type": "bad_sleep", "description": "Neighbors partied till 3 AM. Terrible sleep.", "impact": {"energy": -15, "stress": 12}},
+    {"event_type": "coffee_spill", "description": "Spilled coffee on the desk. Big mess.", "impact": {"stress": 8, "energy": -2}},
+    {"event_type": "workout_boost", "description": "Had a surprisingly great workout session.", "impact": {"energy": 15, "stress": -10}},
 ]
 
 VALID_ACTION_TYPES = frozenset([
