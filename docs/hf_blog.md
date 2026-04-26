@@ -145,7 +145,7 @@ This shifted optimization pressure toward actual competence rather than loophole
 
 LifeOS was built as a complete, modular pipeline. By separating the environment core, the reward logic, and the training loop across a decoupled FastAPI architecture, we ensured the system can be scaled, inspected, and deployed seamlessly.
 
-![Architecture](docs/Architecture.png)
+![Architecture](Architecture.png)
 
 ---
 
