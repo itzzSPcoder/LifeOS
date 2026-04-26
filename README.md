@@ -188,6 +188,12 @@ sequenceDiagram
 
 📓 **Self-contained Colab notebook:** [`lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb`](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb) — clone and run end-to-end.
 
+### 📈 Training Results
+
+![Reward curves showing composite and per-function reward improvement over 50 training episodes](docs/reward_curves.png)
+
+> Composite reward improved from **-2.8** (untrained baseline) to **+1.2** (trained agent) over 50 GRPO episodes. All 4 independent reward signals show consistent upward trends.
+
 ---
 
 ## ✨ Interactive Features

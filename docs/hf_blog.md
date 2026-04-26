@@ -75,6 +75,10 @@ To train the model, we utilized **Group Relative Policy Optimization (GRPO)**. G
 
 Over just 50 episodes, the model transformed its behavior. 
 
+![Reward curves showing composite and per-function reward improvement over 50 training episodes](reward_curves.png)
+
+> Composite reward improved from **-2.8** (untrained baseline) to **+1.2** (trained agent). All 4 independent signals show consistent upward trends — proof that the agent is genuinely learning, not just hacking a single metric.
+
 **Before Training (Heuristic/Base):**
 The model would hyper-fixate on tasks, completely ignoring its energy levels until it hit 0 and burned out. It would ignore friends' messages because it didn't understand the social penalty.
 
