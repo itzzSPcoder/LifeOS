@@ -45,32 +45,47 @@ LifeOS simulates a **chaotic student week** as a 30-step RL episode. An LLM agen
 
 ## 🏗️ Architecture
 
+### System Flow
+
+```mermaid
+graph TD
+    A["🌍 Environment<br/>StudentWeekEnv"] -->|"Observation<br/>(energy, stress, tasks, inbox)"| B["🤖 LLM Agent<br/>Mistral-7B LoRA"]
+    B -->|"Structured Action<br/>(reply, prioritize, rest...)"| A
+    A -->|"State + Action"| C["🏆 Reward Engine"]
+    
+    C --> D["✅ Task Completion"]
+    C --> E["💬 Social Coherence"]
+    C --> F["⚡ Energy Sustainability"]
+    C --> G["📋 Format Compliance"]
+    
+    D --> H["📊 Composite Reward"]
+    E --> H
+    F --> H
+    G --> H
+    
+    H -->|"GRPO Update"| B
+
+    style A fill:#818cf8,stroke:#4338ca,color:#fff
+    style B fill:#c084fc,stroke:#7c3aed,color:#fff
+    style C fill:#f472b6,stroke:#db2777,color:#fff
+    style H fill:#34d399,stroke:#059669,color:#fff
 ```
-                    ┌─────────────────────────────────────────┐
-                    │            OBSERVATION                  │
-                    │  📅 Calendar (conflicts, deadlines)     │
-                    │  📬 Inbox (pending messages)            │
-                    │  ⚡ Energy: 72/100  😰 Stress: 35/100  │
-                    │  💰 Budget: ₹3500   🤝 Relationship: 0.65│
-                    │  🌪️ Chaos: "Assignment moved up 2 days!"│
-                    └──────────────┬──────────────────────────┘
-                                   │
-                                   ▼
-                    ┌──────────────────────────────────┐
-                    │           LLM AGENT              │
-                    │  Chooses structured action:       │
-                    │  reply_message | prioritize_task  │
-                    │  reschedule_event | delegate_task │
-                    │  decline_event | rest             │
-                    └──────────────┬───────────────────┘
-                                   │
-                                   ▼
-                    ┌──────────────────────────────────────────┐
-                    │       4 INDEPENDENT REWARD SIGNALS       │
-                    │  ✅ Task Completion    ✅ Social Coherence│
-                    │  ✅ Energy Sustain.    ✅ Format Compliance│
-                    │  🛡️ Anti-hack: timeout, loop detection   │
-                    └──────────────────────────────────────────┘
+
+### Episode Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Reset: env.reset()
+    Reset --> Observe: Agent receives observation
+    Observe --> Decide: LLM generates action
+    Decide --> Execute: env.step(action)
+    Execute --> Reward: 4 reward signals computed
+    Reward --> ChaosCheck: 20% chance chaos event
+    ChaosCheck --> Observe: step < 30
+    ChaosCheck --> GameOver: step = 30
+    Execute --> Burnout: energy = 0
+    Burnout --> GameOver
+    GameOver --> [*]
 ```
 
 ---
@@ -94,18 +109,42 @@ The agent must choose one of **6 structured actions** per step:
 
 Four **independent** reward functions prevent reward hacking:
 
+```mermaid
+graph LR
+    subgraph "Independent Reward Signals"
+        R1["✅ Task Completion<br/>-1.0 to +1.0"]
+        R2["💬 Social Coherence<br/>-0.8 to +0.5"]
+        R3["⚡ Energy Sustainability<br/>-1.5 to +0.4"]
+        R4["📋 Format Compliance<br/>-1.0 to +0.1"]
+    end
+
+    R1 --> SUM["➕ Composite<br/>Reward"]
+    R2 --> SUM
+    R3 --> SUM
+    R4 --> SUM
+
+    SUM --> GRPO["🧠 GRPO<br/>Weight Update"]
+
+    subgraph "Anti-Hack Layer"
+        AH1["⏱️ Timeout: -2.0"]
+        AH2["🔁 Loop Detection: -0.5"]
+        AH3["🔒 State Access: -1.0"]
+    end
+
+    AH1 --> R4
+    AH2 --> R4
+    AH3 --> R4
+
+    style SUM fill:#34d399,stroke:#059669,color:#fff
+    style GRPO fill:#818cf8,stroke:#4338ca,color:#fff
+```
+
 | Reward Function | What It Measures | Range |
 |---|---|---|
 | **Task Completion** | Deadlines met/missed, unnecessary delegation | -1.0 to +1.0 per task |
 | **Social Coherence** | Message reply timeliness, reschedule reasons | -0.8 to +0.5 per msg |
 | **Energy Sustainability** | Energy above 40, proactive rest, burnout | -1.5 to +0.4 per step |
 | **Format Compliance** | Valid action schema, anti-hack detection | -1.0 to +0.1 per step |
-
-### Anti-Hack Safeguards
-- ⏱️ 30-second step timeout → **-2.0** penalty
-- 🔁 Action loop detection (3+ repeats) → **-0.5** penalty
-- 🔒 Protected state access attempt → **-1.0** penalty
-- 🚫 Chaos queue locked — agent cannot read or modify it
 
 ---
 
@@ -120,6 +159,32 @@ Four **independent** reward functions prevent reward hacking:
 | **Output** | LoRA adapter (not merged — preserves quality) |
 
 **Training loop:** `env.reset()` → LLM generates action → `env.step(action)` → composite reward from all 4 independent functions → GRPO weight update.
+
+```mermaid
+sequenceDiagram
+    participant Colab as Google Colab (T4 GPU)
+    participant Model as Mistral-7B (LoRA)
+    participant Env as StudentWeekEnv
+    participant Reward as Reward Engine
+
+    loop 50 Episodes
+        Colab->>Env: env.reset()
+        Env-->>Model: Observation (tasks, inbox, energy...)
+        
+        loop 30 Steps
+            Model->>Model: Generate action (JSON)
+            Model->>Env: env.step(action)
+            Env->>Reward: State + Action
+            Reward-->>Env: Composite reward (4 signals)
+            Env-->>Model: New observation + reward
+        end
+        
+        Colab->>Model: GRPO weight update
+    end
+    
+    Colab->>Colab: Save LoRA adapter
+    Colab->>Colab: Push to HuggingFace Hub
+```
 
 📓 **Self-contained Colab notebook:** [`lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb`](lifeos/notebooks/lifeos_trl_unsloth_colab.ipynb) — clone and run end-to-end.
 
