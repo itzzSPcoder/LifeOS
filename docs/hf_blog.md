@@ -3,7 +3,7 @@ title: "LifeOS: Training LLMs for the Chaos Between Deadlines and Real Life"
 thumbnail: docs/reward_curves.png
 date: "2026-04-26"
 tags: [openenv, reinforcement-learning, trl, unsloth, gradio, grpo, life-simulation]
-author: SParsh003
+author: "Sparsh Bansal, Ayushika Verma, Aishani Mittal"
 ---
 
 # LifeOS: Training LLMs for the Chaos Between Deadlines and Real Life
