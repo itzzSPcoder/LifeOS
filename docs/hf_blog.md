@@ -81,6 +81,23 @@ The model would hyper-fixate on tasks, completely ignoring its energy levels unt
 **After Training (Fine-Tuned Agent):**
 The model learned to call `rest()` proactively *before* energy dropped too low. It began pausing tasks to quickly `reply_message` to angry friends, balancing its social score with its academic deadlines.
 
+### 🎭 A Real-Life Scenario in Action
+
+To truly understand the model's transformation, let's look at a specific timeline from an evaluation episode:
+
+**Step 8**: The agent has been prioritizing an urgent Math assignment. 
+- *Vitals*: Energy is dropping fast (35/100).
+- *Chaos Strikes!*: The environment triggers `deadline_moved_up`. A History paper due in 4 days is now due tomorrow!
+
+**The Untrained Model's Reaction**: 
+Panics and immediately calls `prioritize_task` on the History paper. By Step 10, Energy hits 0. **Result: Burnout. Game Over. -1.5 Penalty.**
+
+**The Fine-Tuned Agent's Reaction**:
+The agent evaluates the compounding risk. It knows it cannot finish the History paper on 35 Energy. 
+- **Step 9**: Calls `rest()`. Energy recovers to 65.
+- **Step 10**: Uses budget to call `delegate_task` on a minor, low-priority coding task, freeing up schedule space.
+- **Step 11**: Finally calls `prioritize_task` on the History paper with maximum urgency. 
+- **Result**: Survives the chaos, avoids burnout, and completes the paper just in time. This is the power of RL!
 ---
 
 ## ✨ The UI: Visualizing AI "Thoughts"
